@@ -1,0 +1,2 @@
+Access data to log into the camera:
+<address> 	<login> <password> 		<model>
