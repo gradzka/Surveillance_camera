@@ -6,16 +6,42 @@
 using namespace std;
 using namespace cv;
 
+//Sleep, creating folder for Windows and Linux
+#ifdef _WIN32 //If this is Winodows system
+#include <windows.h>
+#pragma warning (disable:4996)
+void sleep(unsigned milliseconds)
+{
+	Sleep(milliseconds);
+}
+void create_folder(string IP)
+{
+	string folder_name="md Screenshots\\" + IP;
+	system(folder_name.c_str());
+}
+#else //for Linux
+#include <unistd.h>
+
+void sleep(unsigned milliseconds)
+{
+	usleep(milliseconds * 1000); // takes microseconds
+}
+void create_folder(string IP)
+{
+	string folder_name = "mkdir Screenshots/" + IP;
+	system(folder_name.c_str());
+}
+#endif
+
 string get_filename(string IP)
 {
 	time_t timer = time(0);   // get time now
-	struct tm now;
-	localtime_s(&now,&timer);
+	struct tm *now = localtime(&timer);
 	char buffer[20];
-	strftime(buffer, sizeof(buffer), "%d-%m-%Y %H-%M-%S", &now);
+	strftime(buffer, sizeof(buffer), "%d-%m-%Y %H-%M-%S",now);
 	string filename;
 	filename.assign(buffer, 19);
-	filename = "Screenshots/" + IP + " " + filename + ".PNG";
+	filename = "Screenshots/"+ IP + "/" + filename + ".PNG";
 	return filename;
 }
 void your_data(string &login, string &password, string &IP)
@@ -44,8 +70,7 @@ void check_your_IP(string &IP, string &file_IP,string &login, string &password, 
 			file_config_login.close();
 			file_config_login.open("Config_login.txt", ios::in);
 
-			//Omit two additional lines in Config_file_login
-			getline(file_config_login, rubbish_line);
+			//Omit additional line in Config_file_login
 			getline(file_config_login, rubbish_line);
 			
 			your_data(login, password, IP);
@@ -62,8 +87,7 @@ void check_your_data(ifstream &file_config_login, ifstream &file_config_camera, 
 
 	string rubbish_line = ""; //includes data from Config_login to skip
 
-	//Omit two additional lines in Config_file_login
-	getline(file_config_login, rubbish_line); //Access data to log into the camera:
+	//Omit additional line in Config_file_login
 	getline(file_config_login, rubbish_line); //<address> <login> <password> <model>
 
 	file_config_login >> file_cl_IP; //first IP from Config_login
@@ -156,11 +180,11 @@ int main(int, char**)
 		{
 			check_your_data(file_config_login,file_config_camera, login, password, IP, not_proper, video);
 		}
-		cout << "Wait for video!" << endl;
+		cout << "Please wait!" << endl;
 	}
 
-	//const string videoStreamAddress = "http://" + login + ":" + password + "@"+ IP + "/"+ video + ".mjpg";
-	const string videoStreamAddress = "http://78.9.31.142/mjpg/video.mjpg";
+	const string videoStreamAddress = "http://" + login + ":" + password + "@"+ IP + "/"+ video + ".mjpg";
+	//const string videoStreamAddress = "http://78.9.31.142/mjpg/video.mjpg"; //helpful in home
 
 	//open the video stream and make sure it's opened
 	if (!vcap.open(videoStreamAddress)) 
@@ -168,39 +192,34 @@ int main(int, char**)
 		cout << "Error opening video stream or file" << endl;
 		return -1;
 	}
-
-	int counter = 0;
+	create_folder(IP);
+	cout << "Screenshots are saving in the \"Screenshots/" + IP + "\"!" << endl;
+	
 	while (true) 
 	{
 		while (!vcap.read(image))
 		{
 			cout << "No frame" << endl;
-
-			image = imread("Error.PNG", IMREAD_COLOR); // Read the file
-
-			if (!image.data) // Check for invalid input
-			{
-				cout << "Could not open or find the image" << endl;
-			}
-			else
-			{
-				imshow("Camera window", image);
-			}
-			waitKey();
 			return 1;
 		}
 
-		if (counter == 0)
+		imwrite(get_filename(IP), image); //save screenshot in the "Screenshots/..."
+
+		
+		//imshow("Camera window", image); //live stream
+
+		sleep(3000);
+		/*
+		//Remove file
+		if (remove("Screenshots/150.254.41.123 06-07-2016 09-05-57.PNG") != 0)
 		{
-			imwrite(get_filename(IP), image);
+			perror("Error deleting file");
 		}
-		counter++;
-		if (counter == 30)
+		else
 		{
-			counter = 0;
+			puts("File successfully deleted");
 		}
-		imshow("Camera window", image);
-		//Sleep(5000);
+		*/
 		if (waitKey(1) >= 0) 
 		{ 
 			break; 

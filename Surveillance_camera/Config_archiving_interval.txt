@@ -1,0 +1,3 @@
+<i - interval/a - archiving>	<seconds>	<minutes>	<hours>
+i				5		0		0
+a				0		10		0		
