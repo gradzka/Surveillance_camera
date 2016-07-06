@@ -8,24 +8,13 @@ using namespace cv;
 
 //Sleep, creating folder for Windows and Linux
 #ifdef _WIN32 //If this is Winodows system
-#include <windows.h>
 #pragma warning (disable:4996)
-void sleep(unsigned milliseconds)
-{
-	Sleep(milliseconds);
-}
 void create_folder(string IP)
 {
 	string folder_name="md Screenshots\\" + IP;
 	system(folder_name.c_str());
 }
 #else //for Linux
-#include <unistd.h>
-
-void sleep(unsigned milliseconds)
-{
-	usleep(milliseconds * 1000); // takes microseconds
-}
 void create_folder(string IP)
 {
 	string folder_name = "mkdir Screenshots/" + IP;
@@ -194,21 +183,29 @@ int main(int, char**)
 	}
 	create_folder(IP);
 	cout << "Screenshots are saving in the \"Screenshots/" + IP + "\"!" << endl;
-	
+	time_t programstart, timepassed;
+
+	while (!vcap.read(image))
+	{
+		cout << "No frame" << endl;
+		return 1;
+	}
 	while (true) 
 	{
-		while (!vcap.read(image))
-		{
-			cout << "No frame" << endl;
-			return 1;
-		}
-
 		imwrite(get_filename(IP), image); //save screenshot in the "Screenshots/..."
-
-		
 		//imshow("Camera window", image); //live stream
 
-		sleep(3000);
+		programstart = time(0);
+		timepassed = 0;
+		while (timepassed < 3)
+		{
+			while (!vcap.read(image))
+			{
+				cout << "No frame" << endl;
+				return 1;
+			}
+			timepassed = time(0) - programstart;
+		}
 		/*
 		//Remove file
 		if (remove("Screenshots/150.254.41.123 06-07-2016 09-05-57.PNG") != 0)
