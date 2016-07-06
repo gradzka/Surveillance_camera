@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "time.h"
-
+#include "io.h"
 using namespace std;
 using namespace cv;
 
@@ -183,8 +183,32 @@ int time_sleep_now(string *interval, string *archiving, ifstream &file_config_ar
 
 	return time_for_sleep_now;
 }
+void delete_screenshots()
+{
+	//getting current time
+	char cur_time[20];
+	strcpy(cur_time, current_time());
+
+	
+	_finddata_t danePliku;
+	long uchwyt;
+	if ((uchwyt = _findfirst("*.txt", &danePliku)) == -1)
+	{
+		cout << "File not found" << endl;
+	}
+	do
+	{
+		cout << danePliku.name << "\t" << danePliku.time_create << endl;
+	} while (_findnext(uchwyt, &danePliku) == 0);
+	_findclose(uchwyt);
+
+
+
+}
 int main(int, char**)
 {
+	delete_screenshots();
+
 	VideoCapture vcap;
 	Mat image;
 
