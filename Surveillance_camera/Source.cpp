@@ -2,41 +2,121 @@
 #include <iostream>
 #include <fstream>
 #include "time.h"
-#include "io.h"
 using namespace std;
 using namespace cv;
 
 //Sleep, creating folder for Windows and Linux
 #ifdef _WIN32 //If this is Winodows system
+
+#include "io.h"
 #pragma warning (disable:4996)
+
 void create_folder(string IP)
 {
 	string folder_name = "md Screenshots\\" + IP;
 	system(folder_name.c_str());
 }
+void delete_screenshots(string *archiving, string IP)
+{
+	//time after which the screen is removed
+	int time_from_archiving = 0; //in seconds
+	time_from_archiving = atoi(archiving[1].c_str()) + 60 * (atoi(archiving[2].c_str())) + 3600 * atoi(archiving[3].c_str()) + 86400 * atoi(archiving[4].c_str());
+
+	_finddata_t danePliku;
+	long uchwyt;
+	string name_of_the_screenshot = "";
+	name_of_the_screenshot = "Screenshots/" + IP + "/" + "*.PNG";
+
+	if ((uchwyt = _findfirst(name_of_the_screenshot.c_str(), &danePliku)) == -1)
+	{
+		cout << name_of_the_screenshot.c_str() << endl;
+		perror("File not found!\n");
+		exit(1);
+	}
+
+	do
+	{
+		if ((time(0)-danePliku.time_write) > time_from_archiving)
+		{
+			//Remove file
+			name_of_the_screenshot = "Screenshots/" + IP +"/"+ danePliku.name;
+			if (remove(name_of_the_screenshot.c_str()) != 0)
+			{
+				cout << name_of_the_screenshot.c_str() << endl;
+				perror("Error deleting file\n");
+				exit(1);
+			}
+		}
+		//cout << danePliku.name << "\t" << danePliku.time_write << endl;
+	} while (_findnext(uchwyt, &danePliku) == 0);
+
+	_findclose(uchwyt);
+}
 #else //for Linux
+
+#include <dirent.h>
+#include <sys/stat.h>
+
 void create_folder(string IP)
 {
+	system("mkdir Screenshots");
 	string folder_name = "mkdir Screenshots/" + IP;
 	system(folder_name.c_str());
 }
+void delete_screenshots(string *archiving, string IP)
+{
+	//time after which the screen is removed
+	int time_from_archiving = 0; //in seconds
+	time_from_archiving = atoi(archiving[1].c_str()) + 60 * (atoi(archiving[2].c_str())) + 3600 * atoi(archiving[3].c_str()) + 86400 * atoi(archiving[4].c_str());
+
+	DIR *dpdf;
+	struct dirent *epdf;
+	char folderName[40] = "./Screenshots/";
+	strcat(folderName, IP.c_str());
+	strcat(folderName, "/");
+	char path[60];
+
+	dpdf = opendir(folderName);
+	if (dpdf != NULL)
+	{
+		struct stat st;
+		while (epdf = readdir(dpdf))
+		{
+			if (strstr(epdf->d_name, ".PNG") != NULL)
+			{
+				strcpy(path, folderName);
+				strcat(path, epdf->d_name);
+
+				if (stat(path, &st))
+				{
+					cout << epdf->d_name << endl;
+					perror("Error deleting file\n");
+					exit(1);
+				}
+				else 
+				{
+					if ((time(0) - (long long)st.st_mtim.tv_sec) > time_from_archiving) 
+					{
+						remove(path);
+						//cout<<time(0)-(long long)st.st_mtim.tv_sec<<endl;
+					}
+				}
+			}
+		}
+		closedir(dpdf);
+	}
+}
 #endif
 
-char *current_time()
+string get_filename(string IP)
 {
 	char cur_time[20];
 	time_t timer = time(0);   // get time now
 	struct tm *now = localtime(&timer);
 	strftime(cur_time, sizeof(cur_time), "%d-%m-%Y %H-%M-%S", now);
 
-	return cur_time;
-}
-string get_filename(string IP)
-{
-	char buffer[20];
-	strcpy(buffer, current_time());
 	string filename;
-	filename.assign(buffer, 19);
+	filename.assign(cur_time, 19);
 	filename = "Screenshots/" + IP + "/" + filename + ".PNG";
 	return filename;
 }
@@ -66,10 +146,18 @@ void check_your_IP(string &IP, string &file_IP, string &login, string &password,
 			file_config_login.close();
 			file_config_login.open("Config_login.txt", ios::in);
 
-			//Omit additional line in Config_file_login
-			getline(file_config_login, rubbish_line);
+			if (file_config_login.good()==true)
+			{
+				//Omit additional line in Config_file_login
+				getline(file_config_login, rubbish_line);
 
-			your_data(login, password, IP);
+				your_data(login, password, IP);
+			}
+			else
+			{
+				perror("Error with \"Config_login.txt\"\n");
+				exit(1);
+			}
 		}
 	}
 }
@@ -103,48 +191,63 @@ void check_your_data(ifstream &file_config_login, ifstream &file_config_camera, 
 	{
 		file_config_camera.open("Config_camera.txt", ios::in);
 	}
-
-	getline(file_config_camera, rubbish_line); //skip first rubbish_line
-	file_config_camera >> file_cc_model; //includes model of the camera
-	file_config_camera >> access_name_for_stream;
-
-	bool wrong_data = true; //check if you enter appropriate data; only used in while
-
-	while (wrong_data == true)
+	if (file_config_camera.good())
 	{
-		if (login == file_cl_login && password == file_cl_password) //data you taped is the same in Config_login
+		getline(file_config_camera, rubbish_line); //skip first rubbish_line
+		file_config_camera >> file_cc_model; //includes model of the camera
+		file_config_camera >> access_name_for_stream;
+
+		bool wrong_data = true; //check if you enter appropriate data; only used in while
+
+		while (wrong_data == true)
 		{
-			not_proper = false;
-			while (!(file_cc_model == file_cl_model)) //model in Config_login file is included in Config_camera file
+			if (login == file_cl_login && password == file_cl_password) //data you taped is the same in Config_login
 			{
-				if (!file_config_camera.eof())
+				not_proper = false;
+				while (!(file_cc_model == file_cl_model)) //model in Config_login file is included in Config_camera file
 				{
-					file_config_camera >> file_cc_model;
-					file_config_camera >> access_name_for_stream;
+					if (!file_config_camera.eof())
+					{
+						file_config_camera >> file_cc_model;
+						file_config_camera >> access_name_for_stream;
+					}
+					else
+					{
+						perror("Lack of necessary information in the Config_camera!\nPossibility of erroneous data in the Config_login!\n");
+						exit(1);
+					}
+				}
+				video = access_name_for_stream;
+				wrong_data = false;
+			}
+
+			else
+			{
+				cout << "WARNING! You typed wrong data!" << endl;
+
+				file_config_login.close();
+				file_config_login.open("Config_login.txt", ios::in);
+				if (file_config_login.good()==true)
+				{
+					your_data(login, password, IP);
+					check_your_IP(IP, file_cl_IP, login, password, file_config_login);
 				}
 				else
 				{
-					cout << "Lack of necessary information in the Config_camera!" << endl << "Possibility of erroneous data in the Config_login!" << endl;
-					exit(0);
+					perror("Error with \"Config_login.txt\"\n");
+					exit(1);
 				}
 			}
-			video = access_name_for_stream;
-			wrong_data = false;
 		}
-
-		else
-		{
-			cout << "WARNING! You typed wrong data!" << endl;
-
-			file_config_login.close();
-			file_config_login.open("Config_login.txt", ios::in);
-
-			your_data(login, password, IP);
-			check_your_IP(IP, file_cl_IP, login, password, file_config_login);
-		}
+		file_config_login.close();
+		file_config_camera.close();
 	}
-	file_config_login.close();
-	file_config_camera.close();
+	else
+	{
+		perror("Error with \"Config_camera.txt\"\n");
+		exit(1);
+	}
+
 }
 //interval
 int time_sleep_now(string *interval, string *archiving, ifstream &file_config_archiving_interval)
@@ -161,18 +264,18 @@ int time_sleep_now(string *interval, string *archiving, ifstream &file_config_ar
 			file_config_archiving_interval >> interval[i];
 			if (interval[0] == "a")
 			{
-				perror("Error in order in the \"file_config_archiving_interval\"");
-				exit(0);
+				perror("Error in order in the \"file_config_archiving_interval.txt\"\n");
+				exit(1);
 			}
 		}
 
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			file_config_archiving_interval >> archiving[i];
 			if (archiving[0] == "i")
 			{
-				perror("Error in order in the \"file_config_archiving_interval\"");
-				exit(0);
+				perror("Error in order in the \"file_config_archiving_interval.txt\"\n");
+				exit(1);
 			}
 		}
 	}
@@ -183,32 +286,8 @@ int time_sleep_now(string *interval, string *archiving, ifstream &file_config_ar
 
 	return time_for_sleep_now;
 }
-void delete_screenshots()
-{
-	//getting current time
-	char cur_time[20];
-	strcpy(cur_time, current_time());
-
-	
-	_finddata_t danePliku;
-	long uchwyt;
-	if ((uchwyt = _findfirst("*.txt", &danePliku)) == -1)
-	{
-		cout << "File not found" << endl;
-	}
-	do
-	{
-		cout << danePliku.name << "\t" << danePliku.time_create << endl;
-	} while (_findnext(uchwyt, &danePliku) == 0);
-	_findclose(uchwyt);
-
-
-
-}
 int main(int, char**)
 {
-	delete_screenshots();
-
 	VideoCapture vcap;
 	Mat image;
 
@@ -226,12 +305,13 @@ int main(int, char**)
 	file_config_login.open("Config_login.txt", ios::in);
 	file_config_camera.open("Config_camera.txt", ios::in);
 
-	//Enter your data
-	your_data(login, password, IP);
 
 	//if files was opened correctly
 	if (file_config_login.good() == true && file_config_camera.good() == true)
 	{
+		//Enter your data
+		your_data(login, password, IP);
+
 		bool not_proper = true;
 		while (not_proper)
 		{
@@ -239,15 +319,19 @@ int main(int, char**)
 		}
 		cout << "Please wait!" << endl;
 	}
-
+	else
+	{
+		perror("Error with \"Config_login.txt\" or \"Config_camera.txt\"\n");
+		exit(1);
+	}
 	const string videoStreamAddress = "http://" + login + ":" + password + "@" + IP + "/" + video + ".mjpg";
 	//const string videoStreamAddress = "http://78.9.31.142/mjpg/video.mjpg"; //helpful in home
 
 	//open the video stream and make sure it's opened
 	if (!vcap.open(videoStreamAddress))
 	{
-		cout << "Error opening video stream or file" << endl;
-		return -1;
+		perror("Error opening video stream or file\n");
+		exit(1);
 	}
 	create_folder(IP);
 	cout << "Screenshots are saving in the \"Screenshots/" + IP + "\"!" << endl;
@@ -257,26 +341,29 @@ int main(int, char**)
 
 	string *interval = new string[5];
 
-	string *archiving = new string[5];
+	string *archiving = new string[6];
 
 	string rubbish_line = "";
 
 	//Open Config_archiving_interval
 	file_config_archiving_interval.open("Config_archiving_interval.txt", ios::in);
 
+	if (file_config_archiving_interval.good() == false)
+	{
+		perror("Error with \"Config_archiving_interval.txt\"\n");
+		exit(1);
+	}
+
 	int time_for_sleep_now = 0;
 	time_for_sleep_now = time_sleep_now(interval, archiving, file_config_archiving_interval);
-
-	delete[]interval;
-	delete[]archiving;
 
 	time_t programstart, timepassed;
 
 	//read initial frame
 	while (!vcap.read(image))
 	{
-		cout << "No frame" << endl;
-		return 1;
+		perror("No frame\n");
+		exit(1);
 	}
 
 	while (true)
@@ -291,25 +378,19 @@ int main(int, char**)
 		{
 			while (!vcap.read(image))
 			{
-				cout << "No frame" << endl;
-				return 1;
+				perror("No frame!\n");
+				exit(1);
 			}
 			timepassed = time(0) - programstart;
 		}
-		/*
-		//Remove file
-		if (remove("Screenshots/<IP> 06-07-2016 09-05-57.PNG") != 0)
-		{
-			perror("Error deleting file");
-		}
-		else
-		{
-			puts("File successfully deleted");
-		}
-		*/
+		delete_screenshots(archiving,IP);
+		
 		if (waitKey(1) >= 0)
 		{
 			break;
 		}
 	}
+
+	delete[]interval;
+	delete[]archiving;
 }

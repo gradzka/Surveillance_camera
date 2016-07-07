@@ -1,3 +1,3 @@
-<i - interval/a - archiving>	<seconds>	<minutes>	<hours>
+<i - interval/a - archiving>	<seconds>	<minutes>	<hours>		<days - only for 'a'>
 i				3		0		0
-a				0		10		0		
+a				30		0		0		0		
