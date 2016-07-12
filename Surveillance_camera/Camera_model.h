@@ -13,7 +13,7 @@ class Camera_model :
 public:
 	list <Preset> list_of_presets;
 public:
-	Camera_model(string ID, string address_IP, string login, string password, string model, string access_name_for_stream);
+	Camera_model(string ID, string address_IP, string login, string password, string model);
 	~Camera_model();
 	virtual void fill_list_of_presets() = 0;
 	virtual void get_frame() = 0;

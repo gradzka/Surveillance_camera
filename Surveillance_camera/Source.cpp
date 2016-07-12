@@ -9,18 +9,15 @@
 
 using namespace std;
 
-string find_access_name_for_stream();
 void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, char *argv[]);
 int read_config_archiving_intervals(int &time_archiving); //returns time that 
 
 int main(int argc, char *argv[])
 {
 	map <string, Camera_model*> map_of_cameras; //map of pointers to Camera_model objects
-
 	fill_map_of_cameras(map_of_cameras, argc, argv);
 
 	map<string, Camera_model*>::iterator iterator;
-
 	for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 	{
 		iterator->second->create_folder();
@@ -43,11 +40,11 @@ int main(int argc, char *argv[])
 		for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 		{
 			iterator->second->get_frame();
+			iterator->second->delete_screenshots(time_archiving);
 		}
 
 		interval_start = time(0);
 		interval_passed = 0;
-
 		while (interval_passed < time_interval)
 		{
 			interval_passed = time(0) - interval_start;
@@ -59,29 +56,6 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-string find_access_name_for_stream(ifstream &file_config_camera, string model_login)
-{
-	string model_camera = "";
-	string access_name_for_stream = "";
-	string rubbish_line = "";
-
-	while (!file_config_camera.eof())
-	{
-		file_config_camera >> model_camera;
-		if (model_login == model_camera)
-		{
-			file_config_camera >> access_name_for_stream;
-			file_config_camera.seekg(0, file_config_camera.beg);
-			break;
-		}
-		else
-		{
-			getline(file_config_camera, rubbish_line);
-		}
-	}
-
-	return access_name_for_stream;
-}
 void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, char *argv[])
 {
 	ifstream file_config_login;
@@ -92,13 +66,9 @@ void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, 
 	string password="";
 	string model_login="";
 
-	ifstream file_config_camera;
-	string access_name_for_stream;
-
 	file_config_login.open("Config_login.txt", ios::in);
-	file_config_camera.open("Config_camera.txt", ios::in);
-
-	if (file_config_login.is_open()&& file_config_camera.is_open())
+	
+	if (file_config_login.is_open())
 	{
 		getline(file_config_login, rubbish_line); //omit additional line in Config_login.txt
 		
@@ -108,40 +78,29 @@ void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, 
 			while (!file_config_login.eof())
 			{
 				file_config_login >> ID >> address_IP >> login >> password >> model_login;
-				access_name_for_stream = find_access_name_for_stream(file_config_camera, model_login);
-
-				if (access_name_for_stream == "")
+				Camera_model *camera_model;
+				if (model_login == "TP-Link")
 				{
-					perror("Error! Access_name_for_stream is empty!");
-					exit(1);
+					camera_model = new TP_Link(ID, address_IP, login, password, model_login);
+				}
+				else if (model_login == "DLink")
+				{
+					camera_model = new DLink(ID, address_IP, login, password, model_login);
 				}
 				else
 				{
-					Camera_model *camera_model;
-					if (model_login == "TP-Link")
-					{
-						camera_model = new TP_Link(ID, address_IP, login, password, model_login, access_name_for_stream);
-					}
-					else if (model_login == "DLink")
-					{
-						camera_model = new DLink(ID, address_IP, login, password, model_login, access_name_for_stream);
-					}
-					else
-					{
-						perror("Undefined type in camera_model_union! Please define it in code!");
-						exit(1);
-					}
-					camera_model->fill_list_of_presets();
-					if (map_of_cameras.find(ID) != map_of_cameras.end())
-					{
-						string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " +ID;
-						cout << s_perror << endl;
-						exit(1);
-					}
-					map_of_cameras[ID]=camera_model;
+					perror("Undefined type in camera_model_union! Please define it in code!");
+					exit(1);
 				}
+				camera_model->fill_list_of_presets();
+				if (map_of_cameras.find(ID) != map_of_cameras.end())
+				{
+					string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " +ID;
+					cout << s_perror << endl;
+					exit(1);
+				}
+				map_of_cameras[ID]=camera_model;				
 			}
-			
 		}
 		// the option with argc parameters in program call
 		else
@@ -152,52 +111,39 @@ void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, 
 				file_config_login >> ID >> address_IP >> login >> password >> model_login;
 				if (strcmp(ID.c_str(), argv[number_of_arguments]) == 0)
 				{
-
-					access_name_for_stream = find_access_name_for_stream(file_config_camera, model_login);
-					if (access_name_for_stream == "")
+					Camera_model *camera_model;
+					if (model_login == "TP-Link")
 					{
-						perror("Error! Access_name_for_stream is empty!");
-						exit(1);
+						camera_model = new TP_Link(ID, address_IP, login, password, model_login);
+					}
+					else if (model_login == "DLink")
+					{
+						camera_model = new DLink(ID, address_IP, login, password, model_login);
 					}
 					else
 					{
-						Camera_model *camera_model;
-						if (model_login == "TP-Link")
-						{
-							camera_model = new TP_Link(ID, address_IP, login, password, model_login, access_name_for_stream);
-						}
-						else if (model_login == "DLink")
-						{
-							camera_model = new DLink(ID, address_IP, login, password, model_login, access_name_for_stream);
-						}
-						else
-						{
-							perror("Undefined type in camera_model_union! Please define it in code!");
-							exit(1);
-						}
-						camera_model->fill_list_of_presets();
-						if (map_of_cameras.find(ID) != map_of_cameras.end())
-						{
-							string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
-							cout << s_perror << endl;
-							exit(1);
-						}
-						map_of_cameras[ID] = camera_model;
-
-						number_of_arguments++;
-						file_config_login.seekg(0, file_config_login.beg);
+						perror("Undefined type in camera_model! Please define it in code!");
+						exit(1);
 					}
+					camera_model->fill_list_of_presets();
+					if (map_of_cameras.find(ID) != map_of_cameras.end())
+					{
+						string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
+						cout << s_perror << endl;
+						exit(1);
+					}
+					map_of_cameras[ID] = camera_model;
+					number_of_arguments++;
+					file_config_login.seekg(0, file_config_login.beg);
 				}
 			}
 		}
 	}
 	else
 	{
-		perror("Error with \"Config_login.txt\" or \"Config_camera.txt\"");
+		perror("Error with \"Config_login.txt\"");
 		exit(1);
 	}
-	
-	file_config_camera.close();
 	file_config_login.close();
 }
 int read_config_archiving_intervals(int &time_archiving)

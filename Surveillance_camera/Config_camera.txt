@@ -1,3 +1,0 @@
-<model>		<access name for stream>
-DLink		video2
-TP-Link		video

@@ -3,7 +3,8 @@
 #include <iostream>
 #include <list>
 #include <sstream>
-#include <string>
+#include <stdlib.h>
+#include <string.h>
 #include "time.h"
 #include <vector>
 
@@ -25,11 +26,11 @@ public:
 	string login;
 	string password;
 	string model;
-	string access_name_for_stream;
 public:
-	Camera(string ID, string address_IP, string login, string password, string model, string access_name_for_stream);
+	Camera(string ID, string address_IP, string login, string password, string model);
 	~Camera();
 	void create_folder();
 	string get_filename();
+	void delete_screenshots(int time_archiving);
 };
 

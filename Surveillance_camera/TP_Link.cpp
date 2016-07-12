@@ -1,10 +1,9 @@
 #include "TP_Link.h"
 
 
-TP_Link::TP_Link(string ID, string address_IP, string login, string password, string model, string access_name_for_stream) : Camera_model(ID, address_IP, login, password, model, access_name_for_stream)
+TP_Link::TP_Link(string ID, string address_IP, string login, string password, string model) : Camera_model(ID, address_IP, login, password, model)
 {
 }
-
 
 TP_Link::~TP_Link()
 {
@@ -16,7 +15,8 @@ void TP_Link::fill_list_of_presets()
 	system(http_query.c_str());
 
 	ifstream file_config_presets;
-	file_config_presets.open("Config_presets_" + address_IP + ".txt", ios::in);
+	string filename_config_presets="Config_presets_" + address_IP + ".txt";
+	file_config_presets.open(filename_config_presets.c_str(), ios::in);
 
 	if (file_config_presets.good())
 	{

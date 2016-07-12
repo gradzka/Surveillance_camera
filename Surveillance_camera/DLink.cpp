@@ -1,7 +1,7 @@
 #include "DLink.h"
 
 
-DLink::DLink(string ID, string address_IP, string login, string password, string model, string access_name_for_stream) : Camera_model(ID, address_IP, login, password, model, access_name_for_stream)
+DLink::DLink(string ID, string address_IP, string login, string password, string model) : Camera_model(ID, address_IP, login, password, model)
 {
 }
 
@@ -41,7 +41,8 @@ void DLink::fill_list_of_presets()
 	system(http_query.c_str());
 
 	ifstream file_config_presets;
-	file_config_presets.open("Config_presets_" + address_IP + ".txt", ios::in);
+	string filename_config_presets="Config_presets_" + address_IP + ".txt";
+	file_config_presets.open(filename_config_presets.c_str(), ios::in);
 	
 	if (file_config_presets.good())
 	{
