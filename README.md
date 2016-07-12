@@ -8,14 +8,12 @@ First step in this project was to capture screenshots from IP cameras. If you lo
 
 ##Tools
 - Microsoft Visual Studio 2013
-- OpenCV
 - wget
 
 ##How to run
 
 
 ##Attributions
-- http://opencv.org/
 - http://gnuwin32.sourceforge.net/packages/wget.htm
 - http://www.cplusplus.com/forum/beginner/46782/#msg256950
 
