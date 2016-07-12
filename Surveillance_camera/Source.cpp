@@ -9,6 +9,7 @@
 
 using namespace std;
 
+Camera_model *return_camera_model_pointer(string model_login, string ID, string address_IP, string login, string password, map <string, Camera_model*> &map_of_cameras);
 void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, char *argv[]);
 int read_config_archiving_intervals(int &time_archiving); //returns time that 
 
@@ -56,6 +57,35 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+Camera_model *return_camera_model_pointer(string model_login, string ID, string address_IP, string login, string password, map <string, Camera_model*> &map_of_cameras)
+{
+	Camera_model *camera_model;
+
+	if (model_login == "TP-Link")
+	{
+		camera_model = new TP_Link(ID, address_IP, login, password, model_login);
+	}
+	else if (model_login == "DLink")
+	{
+		camera_model = new DLink(ID, address_IP, login, password, model_login);
+	}
+	else
+	{
+		perror("Undefined type in camera_model_union! Please define it in code!");
+		exit(1);
+	}
+
+	camera_model->fill_list_of_presets();
+
+	if (map_of_cameras.find(ID) != map_of_cameras.end())
+	{
+		string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
+		cout << s_perror << endl;
+		exit(1);
+	}
+
+	return camera_model;
+}
 void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, char *argv[])
 {
 	ifstream file_config_login;
@@ -78,28 +108,7 @@ void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, 
 			while (!file_config_login.eof())
 			{
 				file_config_login >> ID >> address_IP >> login >> password >> model_login;
-				Camera_model *camera_model;
-				if (model_login == "TP-Link")
-				{
-					camera_model = new TP_Link(ID, address_IP, login, password, model_login);
-				}
-				else if (model_login == "DLink")
-				{
-					camera_model = new DLink(ID, address_IP, login, password, model_login);
-				}
-				else
-				{
-					perror("Undefined type in camera_model_union! Please define it in code!");
-					exit(1);
-				}
-				camera_model->fill_list_of_presets();
-				if (map_of_cameras.find(ID) != map_of_cameras.end())
-				{
-					string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " +ID;
-					cout << s_perror << endl;
-					exit(1);
-				}
-				map_of_cameras[ID]=camera_model;				
+				map_of_cameras[ID] = return_camera_model_pointer(model_login, ID, address_IP, login, password, map_of_cameras);
 			}
 		}
 		// the option with argc parameters in program call
@@ -111,29 +120,10 @@ void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, 
 				file_config_login >> ID >> address_IP >> login >> password >> model_login;
 				if (strcmp(ID.c_str(), argv[number_of_arguments]) == 0)
 				{
-					Camera_model *camera_model;
-					if (model_login == "TP-Link")
-					{
-						camera_model = new TP_Link(ID, address_IP, login, password, model_login);
-					}
-					else if (model_login == "DLink")
-					{
-						camera_model = new DLink(ID, address_IP, login, password, model_login);
-					}
-					else
-					{
-						perror("Undefined type in camera_model! Please define it in code!");
-						exit(1);
-					}
-					camera_model->fill_list_of_presets();
-					if (map_of_cameras.find(ID) != map_of_cameras.end())
-					{
-						string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
-						cout << s_perror << endl;
-						exit(1);
-					}
-					map_of_cameras[ID] = camera_model;
+					map_of_cameras[ID] = return_camera_model_pointer(model_login, ID, address_IP, login, password, map_of_cameras);
+
 					number_of_arguments++;
+
 					file_config_login.seekg(0, file_config_login.beg);
 				}
 			}

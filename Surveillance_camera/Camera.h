@@ -20,7 +20,7 @@ using namespace std;
 
 class Camera
 {
-public:
+protected:
 	string ID;
 	string address_IP;
 	string login;

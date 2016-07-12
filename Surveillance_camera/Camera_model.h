@@ -10,7 +10,7 @@ struct Preset
 class Camera_model :
 	public Camera
 {
-public:
+protected:
 	list <Preset> list_of_presets;
 public:
 	Camera_model(string ID, string address_IP, string login, string password, string model);
