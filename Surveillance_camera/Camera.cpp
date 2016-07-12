@@ -1,12 +1,16 @@
 #include "Camera.h"
 
+Camera::Camera()
+{
+}
+
 Camera::Camera(string ID, string address_IP, string login, string password, string model)
 {
 	this->ID = ID;
 	this->address_IP = address_IP;
 	this->login = login;
 	this->password = password;
-	this->model = model;
+	this->model = return_camera_model_pointer(model, ID, address_IP, login, password);
 }
 
 Camera::~Camera()
@@ -106,17 +110,24 @@ void Camera::delete_screenshots(int time_archiving)
 }
 #endif
 
-string Camera::get_filename()
+Camera_model* Camera::return_camera_model_pointer(string model_login, string ID, string address_IP, string login, string password)
 {
-	char cur_time[20];
-	time_t timer = time(0);
-	struct tm *now = localtime(&timer);
-	strftime(cur_time, sizeof(cur_time), "%d-%m-%Y %H-%M-%S", now);
+	Camera_model *camera_model;
 
-	string filename;
-	filename.assign(cur_time, 19);
-	filename = "\"Screenshots/" + address_IP + "/" + filename + ".jpg\"";
-	//cout << filename << endl;
+	if (model_login == "TP-Link")
+	{
+		camera_model = new TP_Link();
+	}
+	else if (model_login == "DLink")
+	{
+		camera_model = new DLink();
+	}
+	else
+	{
+		perror("Undefined type in camera_model! Please define it in code!");
+		exit(1);
+	}
 
-	return filename;
+	camera_model->fill_list_of_presets(login, password, address_IP, list_of_presets);
+	return camera_model;
 }

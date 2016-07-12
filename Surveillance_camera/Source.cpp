@@ -9,19 +9,18 @@
 
 using namespace std;
 
-Camera_model *return_camera_model_pointer(string model_login, string ID, string address_IP, string login, string password, map <string, Camera_model*> &map_of_cameras);
-void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, char *argv[]);
+void fill_map_of_cameras(map <string, Camera> &map_of_cameras, int argc, char *argv[]);
 int read_config_archiving_intervals(int &time_archiving); //returns time that 
 
 int main(int argc, char *argv[])
 {
-	map <string, Camera_model*> map_of_cameras; //map of pointers to Camera_model objects
+	map <string, Camera> map_of_cameras; //map of pointers to Camera_model objects
 	fill_map_of_cameras(map_of_cameras, argc, argv);
 
-	map<string, Camera_model*>::iterator iterator;
+	map<string, Camera>::iterator iterator;
 	for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 	{
-		iterator->second->create_folder();
+		iterator->second.create_folder();
 	}
 
 	//Read from "Config_archiving_interval.txt"
@@ -40,8 +39,8 @@ int main(int argc, char *argv[])
 	{
 		for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 		{
-			iterator->second->get_frame();
-			iterator->second->delete_screenshots(time_archiving);
+			iterator->second.model->get_frame(iterator->second.login, iterator->second.password, iterator->second.address_IP);
+			iterator->second.delete_screenshots(time_archiving);
 		}
 
 		interval_start = time(0);
@@ -57,36 +56,8 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-Camera_model *return_camera_model_pointer(string model_login, string ID, string address_IP, string login, string password, map <string, Camera_model*> &map_of_cameras)
-{
-	Camera_model *camera_model;
 
-	if (model_login == "TP-Link")
-	{
-		camera_model = new TP_Link(ID, address_IP, login, password, model_login);
-	}
-	else if (model_login == "DLink")
-	{
-		camera_model = new DLink(ID, address_IP, login, password, model_login);
-	}
-	else
-	{
-		perror("Undefined type in camera_model_union! Please define it in code!");
-		exit(1);
-	}
-
-	camera_model->fill_list_of_presets();
-
-	if (map_of_cameras.find(ID) != map_of_cameras.end())
-	{
-		string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
-		cout << s_perror << endl;
-		exit(1);
-	}
-
-	return camera_model;
-}
-void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, char *argv[])
+void fill_map_of_cameras(map <string, Camera> &map_of_cameras, int argc, char *argv[])
 {
 	ifstream file_config_login;
 	string rubbish_line = "";
@@ -94,7 +65,7 @@ void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, 
 	string address_IP = "";
 	string login="";
 	string password="";
-	string model_login="";
+	string model="";
 
 	file_config_login.open("Config_login.txt", ios::in);
 	
@@ -107,8 +78,16 @@ void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, 
 		{
 			while (!file_config_login.eof())
 			{
-				file_config_login >> ID >> address_IP >> login >> password >> model_login;
-				map_of_cameras[ID] = return_camera_model_pointer(model_login, ID, address_IP, login, password, map_of_cameras);
+				file_config_login >> ID >> address_IP >> login >> password >> model;
+				if (map_of_cameras.find(ID) != map_of_cameras.end())
+				{
+					string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
+					cout << s_perror << endl;
+					exit(1);
+				}
+
+				Camera camera(ID, address_IP, login, password, model);
+				map_of_cameras[ID] = camera;
 			}
 		}
 		// the option with argc parameters in program call
@@ -117,10 +96,18 @@ void fill_map_of_cameras(map <string, Camera_model*> &map_of_cameras, int argc, 
 			int number_of_arguments = 0;
 			for (number_of_arguments = 1; number_of_arguments < argc;)
 			{
-				file_config_login >> ID >> address_IP >> login >> password >> model_login;
+				file_config_login >> ID >> address_IP >> login >> password >> model;
 				if (strcmp(ID.c_str(), argv[number_of_arguments]) == 0)
 				{
-					map_of_cameras[ID] = return_camera_model_pointer(model_login, ID, address_IP, login, password, map_of_cameras);
+					if (map_of_cameras.find(ID) != map_of_cameras.end())
+					{
+						string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
+						cout << s_perror << endl;
+						exit(1);
+					}
+
+					Camera camera(ID, address_IP, login, password, model);
+					map_of_cameras[ID] = camera;
 
 					number_of_arguments++;
 

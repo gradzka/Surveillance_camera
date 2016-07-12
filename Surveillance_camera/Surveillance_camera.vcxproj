@@ -14,6 +14,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Camera_model.cpp" />
     <ClCompile Include="DLink.cpp" />
+    <ClCompile Include="Preset.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="TP_Link.cpp" />
   </ItemGroup>
@@ -21,6 +22,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Camera_model.h" />
     <ClInclude Include="DLink.h" />
+    <ClInclude Include="Preset.h" />
     <ClInclude Include="TP_Link.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

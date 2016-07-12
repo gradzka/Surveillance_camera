@@ -21,13 +21,16 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Camera_model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TP_Link.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DLink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Preset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera_model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,13 +38,16 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Camera_model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TP_Link.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DLink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Preset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera_model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

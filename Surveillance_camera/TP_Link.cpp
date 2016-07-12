@@ -1,7 +1,7 @@
 #include "TP_Link.h"
 
 
-TP_Link::TP_Link(string ID, string address_IP, string login, string password, string model) : Camera_model(ID, address_IP, login, password, model)
+TP_Link::TP_Link()
 {
 }
 
@@ -9,7 +9,7 @@ TP_Link::~TP_Link()
 {
 }
 
-void TP_Link::fill_list_of_presets()
+void TP_Link::fill_list_of_presets(string login, string password, string address_IP, list <Preset> &list_of_presets)
 {
 	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/param?action=list&group=PTZ.PresetPos\" -O Config_presets_" + address_IP + ".txt 2> NUL";
 	system(http_query.c_str());
@@ -63,8 +63,8 @@ void TP_Link::fill_list_of_presets()
 	}
 	
 }
-void TP_Link::get_frame()
+void TP_Link::get_frame(string login, string password, string address_IP)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/jpg/image.jpg\" -O " + get_filename() + " 2> NUL";
+	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/jpg/image.jpg\" -O " + get_filename(address_IP) + " 2> NUL";
 	system(http_query.c_str());
 }

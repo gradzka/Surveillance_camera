@@ -1,21 +1,22 @@
 #pragma once
-#include "Camera.h"
 
-struct Preset
-{
-	string No;
-	string preset_name;
-};
+#include <fstream>
+#include <list>
+#include <string>
+#include "time.h"
 
-class Camera_model :
-	public Camera
+#include "Preset.h"
+
+#pragma warning (disable:4996)
+using namespace std;
+
+class Camera_model
 {
-protected:
-	list <Preset> list_of_presets;
 public:
-	Camera_model(string ID, string address_IP, string login, string password, string model);
+	Camera_model();
 	~Camera_model();
-	virtual void fill_list_of_presets() = 0;
-	virtual void get_frame() = 0;
+	string get_filename(string address_IP);
+	virtual void fill_list_of_presets(string login, string password, string address_IP, list <Preset> &list_of_presets) = 0;
+	virtual void get_frame(string login, string password, string address_IP) = 0;
 };
 
