@@ -1,8 +1,5 @@
 #pragma once
 #include "Camera_model.h"
-#include <iostream>
-
-using namespace std;
 
 class DLink :
 	public Camera_model

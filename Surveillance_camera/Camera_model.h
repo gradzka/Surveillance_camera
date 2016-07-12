@@ -1,8 +1,10 @@
 #pragma once
 
 #include <fstream>
+#include <iostream>
 #include <list>
-#include <string>
+#include <string.h>
+#include <stdlib.h>
 #include "time.h"
 
 #include "Preset.h"

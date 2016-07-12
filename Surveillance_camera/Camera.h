@@ -34,7 +34,6 @@ public:
 	Camera_model *return_camera_model_pointer(string model_login, string ID, string address_IP, string login, string password);
 public:
 	Camera_model *model;
-	Camera();
 	Camera(string ID, string address_IP, string login, string password, string model);
 	~Camera();
 	void create_folder();

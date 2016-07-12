@@ -1,9 +1,5 @@
 #include "Camera.h"
 
-Camera::Camera()
-{
-}
-
 Camera::Camera(string ID, string address_IP, string login, string password, string model)
 {
 	this->ID = ID;

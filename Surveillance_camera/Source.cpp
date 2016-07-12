@@ -9,18 +9,18 @@
 
 using namespace std;
 
-void fill_map_of_cameras(map <string, Camera> &map_of_cameras, int argc, char *argv[]);
+void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char *argv[]);
 int read_config_archiving_intervals(int &time_archiving); //returns time that 
 
 int main(int argc, char *argv[])
 {
-	map <string, Camera> map_of_cameras; //map of pointers to Camera_model objects
+	map <string, Camera *> map_of_cameras; //map of pointers to Camera_model objects
 	fill_map_of_cameras(map_of_cameras, argc, argv);
 
-	map<string, Camera>::iterator iterator;
+	map<string, Camera *>::iterator iterator;
 	for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 	{
-		iterator->second.create_folder();
+		iterator->second->create_folder();
 	}
 
 	//Read from "Config_archiving_interval.txt"
@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
 	{
 		for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 		{
-			iterator->second.model->get_frame(iterator->second.login, iterator->second.password, iterator->second.address_IP);
-			iterator->second.delete_screenshots(time_archiving);
+			iterator->second->model->get_frame(iterator->second->login, iterator->second->password, iterator->second->address_IP);
+			iterator->second->delete_screenshots(time_archiving);
 		}
 
 		interval_start = time(0);
@@ -50,14 +50,14 @@ int main(int argc, char *argv[])
 			interval_passed = time(0) - interval_start;
 		}
 	}
-
+	
 	//Clear
 	map_of_cameras.clear();
 	return 0;
 }
 
 
-void fill_map_of_cameras(map <string, Camera> &map_of_cameras, int argc, char *argv[])
+void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char *argv[])
 {
 	ifstream file_config_login;
 	string rubbish_line = "";
@@ -86,8 +86,9 @@ void fill_map_of_cameras(map <string, Camera> &map_of_cameras, int argc, char *a
 					exit(1);
 				}
 
-				Camera camera(ID, address_IP, login, password, model);
+				Camera *camera = new Camera(ID, address_IP, login, password, model);
 				map_of_cameras[ID] = camera;
+
 			}
 		}
 		// the option with argc parameters in program call
@@ -106,9 +107,17 @@ void fill_map_of_cameras(map <string, Camera> &map_of_cameras, int argc, char *a
 						exit(1);
 					}
 
-					Camera camera(ID, address_IP, login, password, model);
+					Camera *camera = new Camera(ID, address_IP, login, password, model);
 					map_of_cameras[ID] = camera;
 
+					number_of_arguments++;
+
+					file_config_login.seekg(0, file_config_login.beg);
+				}
+
+				else if (file_config_login.eof())
+				{
+					cout << "The ID: " << argv[number_of_arguments] << " isn't in \"Config_login.txt\"" << endl;
 					number_of_arguments++;
 
 					file_config_login.seekg(0, file_config_login.beg);
@@ -121,6 +130,13 @@ void fill_map_of_cameras(map <string, Camera> &map_of_cameras, int argc, char *a
 		perror("Error with \"Config_login.txt\"");
 		exit(1);
 	}
+
+	if (map_of_cameras.empty() == true)
+	{
+		cout << "Error! The <map_of_cameras> is empty! Problably \"Config_login\" is not filled" << endl;
+		exit(1);
+	}
+
 	file_config_login.close();
 }
 int read_config_archiving_intervals(int &time_archiving)
