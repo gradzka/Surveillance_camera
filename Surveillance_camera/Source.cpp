@@ -2,7 +2,7 @@
 #include <fstream>
 #include <map>
 #include "time.h"
-
+#include <Windows.h>
 #include "Camera.h"
 #include "DLink.h"
 #include "TP_Link.h"
@@ -33,6 +33,8 @@ int main(int argc, char *argv[])
 	//time to check if interval has passed
 	time_t interval_start = 0;
 	time_t interval_passed = 0;
+
+	//map_of_cameras["4"]->model->set_position(map_of_cameras["4"]->login, map_of_cameras["4"]->password, map_of_cameras["4"]->address_IP, 1, map_of_cameras["4"]->vector_of_presets);
 
 	//main loop
 	while (true)
@@ -191,6 +193,5 @@ int read_config_archiving_intervals(int &time_archiving)
 		//Close Config_archiving_interval
 		file_config_archiving_interval.close();
 	}
-
 	return time_interval;
 }

@@ -106,15 +106,15 @@ void Camera::delete_screenshots(int time_archiving)
 }
 #endif
 
-Camera_model* Camera::return_camera_model_pointer(string model_login, string ID, string address_IP, string login, string password)
+Camera_model* Camera::return_camera_model_pointer(string model, string ID, string address_IP, string login, string password)
 {
 	Camera_model *camera_model;
 
-	if (model_login == "TP-Link")
+	if (model == "TP-Link")
 	{
 		camera_model = new TP_Link();
 	}
-	else if (model_login == "DLink")
+	else if (model == "DLink")
 	{
 		camera_model = new DLink();
 	}
@@ -124,6 +124,11 @@ Camera_model* Camera::return_camera_model_pointer(string model_login, string ID,
 		exit(1);
 	}
 
-	camera_model->fill_list_of_presets(login, password, address_IP, list_of_presets);
+	camera_model->fill_vector_of_presets(login, password, address_IP, vector_of_presets);
 	return camera_model;
+}
+
+int Camera::get_number_of_presets()
+{
+	return vector_of_presets.size();
 }

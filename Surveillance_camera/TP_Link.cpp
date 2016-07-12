@@ -9,7 +9,7 @@ TP_Link::~TP_Link()
 {
 }
 
-void TP_Link::fill_list_of_presets(string login, string password, string address_IP, list <Preset> &list_of_presets)
+void TP_Link::fill_vector_of_presets(string login, string password, string address_IP, vector <Preset> &vector_of_presets)
 {
 	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/param?action=list&group=PTZ.PresetPos\" -O Config_presets_" + address_IP + ".txt 2> NUL";
 	system(http_query.c_str());
@@ -47,7 +47,7 @@ void TP_Link::fill_list_of_presets(string login, string password, string address
 					{
 						loaded_preset.No = "";
 						loaded_preset.preset_name = substring_of_char_line_in_file;
-						list_of_presets.push_back(loaded_preset);
+						vector_of_presets.push_back(loaded_preset);
 						//cout << substring_of_char_line_in_file << "\n";
 					}
 				}
@@ -66,5 +66,12 @@ void TP_Link::fill_list_of_presets(string login, string password, string address
 void TP_Link::get_frame(string login, string password, string address_IP)
 {
 	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/jpg/image.jpg\" -O " + get_filename(address_IP) + " 2> NUL";
+	system(http_query.c_str());
+}
+
+void TP_Link::set_position(string login, string password, string address_IP, int preset_number, vector <Preset> &vector_of_presets)
+{
+	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/ptzset?gotoserverpresetname=" + vector_of_presets[preset_number].preset_name + "\" --spider 2> NUL";
+	//cout << http_query << endl;
 	system(http_query.c_str());
 }

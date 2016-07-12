@@ -10,7 +10,7 @@ DLink::~DLink()
 {
 }
 
-void DLink::help_fill_list_of_presets(string &line_in_file, char *char_line_in_file, char *substring_of_char_line_in_file, list <Preset> &list_of_presets)
+void DLink::help_fill_vector_of_presets(string &line_in_file, char *char_line_in_file, char *substring_of_char_line_in_file, vector <Preset> &vector_of_presets)
 {
 	Preset loaded_preset;
 	bool No_or_preset_name = true; //if "true" then "No" else if "false" then "preset_name"
@@ -29,13 +29,13 @@ void DLink::help_fill_list_of_presets(string &line_in_file, char *char_line_in_f
 		{
 			loaded_preset.preset_name = substring_of_char_line_in_file;
 			No_or_preset_name = true;
-			list_of_presets.push_back(loaded_preset);
+			vector_of_presets.push_back(loaded_preset);
 		}
 		//cout << substring_of_char_line_in_file << "\n";
 		substring_of_char_line_in_file = strtok(NULL, "-");	
 	}
 }
-void DLink::fill_list_of_presets(string login, string password, string address_IP, list <Preset> &list_of_presets)
+void DLink::fill_vector_of_presets(string login, string password, string address_IP, vector <Preset> &vector_of_presets)
 {
 	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/ptz_dlink.js?2.1.25\" -O Config_presets_" + address_IP+ ".txt 2> NUL";
 	system(http_query.c_str());
@@ -64,10 +64,10 @@ void DLink::fill_list_of_presets(string login, string password, string address_I
 					if (strstr(line_in_file.c_str(), ",\"--Preset List--") != NULL)
 					{
 						line_in_file.erase(line_in_file.begin() + line_in_file.find_first_of("\""), line_in_file.end());
-						help_fill_list_of_presets(line_in_file, char_line_in_file, substring_of_char_line_in_file, list_of_presets);
+						help_fill_vector_of_presets(line_in_file, char_line_in_file, substring_of_char_line_in_file, vector_of_presets);
 						break;
 					}
-					help_fill_list_of_presets(line_in_file, char_line_in_file, substring_of_char_line_in_file, list_of_presets);
+					help_fill_vector_of_presets(line_in_file, char_line_in_file, substring_of_char_line_in_file, vector_of_presets);
 				}
 
 				file_config_presets.close();
@@ -84,6 +84,13 @@ void DLink::fill_list_of_presets(string login, string password, string address_I
 void DLink::get_frame(string login, string password, string address_IP)
 {
 	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/dms\" -O " + get_filename(address_IP) + " 2> NUL";
+	//cout << http_query << endl;
+	system(http_query.c_str());
+}
+
+void DLink::set_position(string login, string password, string address_IP, int preset_number, vector <Preset> &vector_of_presets)
+{
+	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/longcctvpst.cgi?action=goto&name=" + vector_of_presets[preset_number].preset_name + "&number=" + vector_of_presets[preset_number].No + "\" --spider 2> NUL";
 	//cout << http_query << endl;
 	system(http_query.c_str());
 }
