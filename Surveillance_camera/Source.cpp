@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-#include "time.h"
 
 #include "Camera.h"
 #include "DLink.h"
@@ -12,23 +11,23 @@ using namespace std;
 #define time_for_changing_position 5000
 
 #ifdef _WIN32
-void sleep(unsigned milliseconds)
+void sleep_now(unsigned milliseconds)
 {
 	Sleep(milliseconds);
 }
 #else
-void sleep(unsigned milliseconds)
+void sleep_now(unsigned milliseconds)
 {
 	usleep(milliseconds * 1000); //takes microseconds
 }
 #endif
 
-
 unsigned int Camera::max_number_of_presets = 0;
-void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, unsigned int argc, char *argv[]);
+
+void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char *argv[]);
 unsigned int read_config_archiving_intervals(unsigned int &time_archiving); //returns time that 
 
-int main(unsigned int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	map <string, Camera *> map_of_cameras; //map of pointers to Camera_model objects
 	fill_map_of_cameras(map_of_cameras, argc, argv);
@@ -60,7 +59,7 @@ int main(unsigned int argc, char *argv[])
 				}
 			}
 
-			sleep(time_for_changing_position);
+			sleep_now(time_for_changing_position);
 
 			for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 			{
@@ -79,12 +78,12 @@ int main(unsigned int argc, char *argv[])
 			iterator->second->delete_screenshots(time_archiving);
 		}
 
-		if (argc >= 1) //the option with argc parameters in program call, after one patrol program will be ended
+		if (argc > 1) //the option with argc parameters in program call, after one patrol program will be ended
 		{
 			break; 
 		}
 
-		sleep(time_interval * 1000);
+		sleep_now(time_interval * 1000);
 	}
 
 	//deleting Camera objects
@@ -100,7 +99,7 @@ int main(unsigned int argc, char *argv[])
 	return 0;
 }
 
-void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, unsigned int argc, char *argv[])
+void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char *argv[])
 {
 	ifstream file_config_login;
 	string rubbish_line = "";
@@ -139,7 +138,7 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, unsigned int ar
 		// the option with argc parameters in program call
 		else
 		{
-			unsigned int number_of_arguments = 0;
+			int number_of_arguments = 0;
 
 			for (number_of_arguments = 1; number_of_arguments < argc;)
 			{

@@ -44,7 +44,7 @@ void Camera::create_folder()
 void Camera::delete_screenshots(unsigned int time_archiving)
 {
 	_finddata_t danePliku;
-	long uchwyt;
+	int uchwyt;
 	string name_of_the_screenshot = "";
 	name_of_the_screenshot = "Screenshots/" + address_IP + "/" + "*.jpg";
 
