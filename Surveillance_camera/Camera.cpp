@@ -146,10 +146,28 @@ Camera_model* Camera::return_camera_model_pointer(string model, string ID, strin
 	}
 
 	camera_model->fill_vector_of_presets(login, password, address_IP, vector_of_presets);
+
+	//cout << address_IP << "\t" << get_number_of_presets() << endl;
+
+	if (get_number_of_presets() > max_number_of_presets)
+	{
+		max_number_of_presets = get_number_of_presets();
+	}
+
 	return camera_model;
 }
 
 int Camera::get_number_of_presets()
 {
 	return vector_of_presets.size();
+}
+
+int Camera::return_max_number_of_presets()
+{
+	return max_number_of_presets;
+}
+
+vector <Preset> Camera::return_vector_of_presets()
+{
+	return vector_of_presets;
 }
