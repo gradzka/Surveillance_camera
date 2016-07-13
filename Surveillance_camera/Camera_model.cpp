@@ -1,10 +1,8 @@
 #include "Camera_model.h"
 
-
 Camera_model::Camera_model()
 {
 }
-
 
 Camera_model::~Camera_model()
 {
@@ -23,4 +21,23 @@ string Camera_model::get_filename(string address_IP)
 	//cout << filename << endl;
 
 	return filename;
+}
+
+bool Camera_model::is_file_empty(ifstream &file)
+{
+	int length = 0;
+	file.seekg(0, ios::end);
+	// odczytaj pozycje w pliku -> rozmiar pliku
+	length = file.tellg();
+	// wroc na poczatek pliku!
+	file.seekg(0, ios::beg);
+	if (length == 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+	
 }

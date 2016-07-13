@@ -1,6 +1,5 @@
 #include "TP_Link.h"
 
-
 TP_Link::TP_Link()
 {
 }
@@ -11,15 +10,27 @@ TP_Link::~TP_Link()
 
 void TP_Link::fill_vector_of_presets(string login, string password, string address_IP, vector <Preset> &vector_of_presets)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/param?action=list&group=PTZ.PresetPos\" -O Config_presets_" + address_IP + ".txt 2> NUL";
+	string http_query = "wget --tries=2 \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/param?action=list&group=PTZ.PresetPos\" -O Config_presets_" + address_IP + ".txt 2> NUL";
 	system(http_query.c_str());
 
 	ifstream file_config_presets;
 	string filename_config_presets="Config_presets_" + address_IP + ".txt";
 	file_config_presets.open(filename_config_presets.c_str(), ios::in);
 
-	if (file_config_presets.good())
+	if (file_config_presets.good()==true)
 	{
+		if (is_file_empty(file_config_presets) == true)
+		{
+			cout << "\nCan't connect with "+ address_IP + ". Check your Internet connection or data in \"Config_login.txt\"!" << endl;
+			file_config_presets.close();
+			if (remove(filename_config_presets.c_str()) != 0)
+			{
+				cout << filename_config_presets.c_str() << endl;
+				perror("Error deleting file\n");
+				exit(1);
+			}
+			exit(1);
+		}
 		string line_in_file("");
 		char char_line_in_file[100];
 		char *substring_of_char_line_in_file = NULL;
@@ -55,18 +66,18 @@ void TP_Link::fill_vector_of_presets(string login, string password, string addre
 		}
 
 	file_config_presets.close();
-
+	/*
 	if (remove(filename_config_presets.c_str()) != 0)
 	{
 		cout << filename_config_presets.c_str() << endl;
 		perror("Error deleting file\n");
 		exit(1);
-	}
+	}*/
 
 	}
 	else
 	{
-		perror("Error! It is problem with Config_presets_IP.txt file");
+		perror("Error! Can't download list of preset. Check if you have wget installed!");
 		exit(1);
 	}
 	

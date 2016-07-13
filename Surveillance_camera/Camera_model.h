@@ -22,5 +22,6 @@ public:
 	virtual void set_position(string login, string password, string address_IP, unsigned int preset_number, vector <Preset> &vector_of_presets) = 0;
 protected:
 	string get_filename(string address_IP);
+	bool is_file_empty(ifstream &file);
 };
 

@@ -1,10 +1,8 @@
 #include "DLink.h"
 
-
 DLink::DLink()
 {
 }
-
 
 DLink::~DLink()
 {
@@ -37,8 +35,26 @@ void DLink::help_fill_vector_of_presets(string &line_in_file, char *char_line_in
 }
 void DLink::fill_vector_of_presets(string login, string password, string address_IP, vector <Preset> &vector_of_presets)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/ptz_dlink.js?2.1.25\" -O Config_presets_" + address_IP+ ".txt 2> NUL";
+	string http_query = "wget --tries=2 \"http://" + address_IP + "/ptz_dlink.js?2.1.25\" -O Config_presets_" + address_IP+ ".txt 2> NUL";
 	system(http_query.c_str());
+
+	ifstream file_check;
+	http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/dms\" -O TMP.jpg 2> NUL";
+	//cout << http_query << endl;
+	system(http_query.c_str());
+	file_check.open("TMP.jpg", ios::in);
+	if (is_file_empty(file_check) == true)
+	{
+		cout << "\nCan't connect with " + address_IP + ". Check your Internet connection or IP address in \"Config_login.txt\"!" << endl;
+		file_check.close();
+		if (remove("TMP.jpg") != 0)
+		{
+			cout << "TMP.jpg" << endl;
+			perror("Error deleting file\n");
+			exit(1);
+		}
+		exit(1);
+	}
 
 	ifstream file_config_presets;
 	string filename_config_presets="Config_presets_" + address_IP + ".txt";
@@ -46,6 +62,19 @@ void DLink::fill_vector_of_presets(string login, string password, string address
 	
 	if (file_config_presets.good())
 	{
+		if (is_file_empty(file_config_presets) == true)
+		{
+			cout << "\nCan't connect with " + address_IP + ". Check your Internet connection or IP address in \"Config_login.txt\"!" << endl;
+			file_config_presets.close();
+			if (remove(filename_config_presets.c_str()) != 0)
+			{
+				cout << filename_config_presets.c_str() << endl;
+				perror("Error deleting file\n");
+				exit(1);
+			}
+			exit(1);
+		}
+
 		string line_in_file= "";
 		char char_line_in_file[41];
 		char *substring_of_char_line_in_file = NULL;
@@ -72,12 +101,12 @@ void DLink::fill_vector_of_presets(string login, string password, string address
 
 				file_config_presets.close();
 
-				if (remove(filename_config_presets.c_str()) != 0)
+			/*	if (remove(filename_config_presets.c_str()) != 0)
 				{
 					cout << filename_config_presets.c_str() << endl;
 					perror("Error deleting file\n");
 					exit(1);
-				}
+				}*/
 				break;
 			}
 		}

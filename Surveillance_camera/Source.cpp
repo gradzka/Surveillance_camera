@@ -29,6 +29,13 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving); //re
 
 int main(int argc, char *argv[])
 {
+	//Read from "Config_archiving_interval.txt"
+	unsigned int time_archiving = 0;
+	unsigned int time_interval = 0;
+
+	time_interval = read_config_archiving_intervals(time_archiving);
+	//cout << "T_A: " << time_archiving << " T_I: " << time_interval << endl;
+
 	map <string, Camera *> map_of_cameras; //map of pointers to Camera_model objects
 	fill_map_of_cameras(map_of_cameras, argc, argv);
 
@@ -37,13 +44,6 @@ int main(int argc, char *argv[])
 	{
 		iterator->second->create_folder();
 	}
-
-	//Read from "Config_archiving_interval.txt"
-	unsigned int time_archiving = 0;
-	unsigned int time_interval = 0;
-
-	time_interval = read_config_archiving_intervals(time_archiving);
-	//cout << "T_A: " << time_archiving << " T_I: " << time_interval << endl;
 
 	//main loop
 	while (true)
@@ -211,7 +211,7 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 		{
 			file_config_archiving_interval >> interval[i];
 
-			if (interval[0] == "a")
+			if (interval[0] != "i")
 			{
 				perror("Error in order in the \"file_config_archiving_interval.txt\"");
 				exit(1);
@@ -222,7 +222,7 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 		{
 			file_config_archiving_interval >> archiving[i];
 
-			if (archiving[0] == "i")
+			if (archiving[0] != "a")
 			{
 				perror("Error in order in the \"file_config_archiving_interval.txt\"");
 				exit(1);

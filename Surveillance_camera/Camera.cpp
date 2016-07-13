@@ -139,12 +139,13 @@ Camera_model* Camera::get_camera_model_pointer(string model, string ID, string a
 	}
 	else
 	{
-		perror("Undefined type in camera_model! Please define it in code!");
+		cout << model + " is undefined in camera_model! Please define it in code!" << endl;
 		exit(1);
 	}
 
+	cout << "Connecting with " + address_IP + "...\t";
 	camera_model->fill_vector_of_presets(login, password, address_IP, vector_of_presets);
-
+	cout << "Connected successfully!" << endl;
 	//cout << address_IP << "\t" << get_number_of_presets() << endl;
 
 	if (get_number_of_presets() > max_number_of_presets)
