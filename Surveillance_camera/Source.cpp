@@ -9,13 +9,26 @@
 
 using namespace std;
 
-#define time_for_changing_position 5
+#define time_for_changing_position 5000
 
-int Camera::max_number_of_presets = 0;
-void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char *argv[]);
-int read_config_archiving_intervals(int &time_archiving); //returns time that 
+#ifdef _WIN32
+void sleep(unsigned milliseconds)
+{
+	Sleep(milliseconds);
+}
+#else
+void sleep(unsigned milliseconds)
+{
+	usleep(milliseconds * 1000); //takes microseconds
+}
+#endif
 
-int main(int argc, char *argv[])
+
+unsigned int Camera::max_number_of_presets = 0;
+void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, unsigned int argc, char *argv[]);
+unsigned int read_config_archiving_intervals(unsigned int &time_archiving); //returns time that 
+
+int main(unsigned int argc, char *argv[])
 {
 	map <string, Camera *> map_of_cameras; //map of pointers to Camera_model objects
 	fill_map_of_cameras(map_of_cameras, argc, argv);
@@ -27,71 +40,67 @@ int main(int argc, char *argv[])
 	}
 
 	//Read from "Config_archiving_interval.txt"
-	int time_archiving = 0;
-	int time_interval = 0;
+	unsigned int time_archiving = 0;
+	unsigned int time_interval = 0;
 
 	time_interval = read_config_archiving_intervals(time_archiving);
 	//cout << "T_A: " << time_archiving << " T_I: " << time_interval << endl;
-
-	//time to check if interval has passed
-	time_t interval_start = 0;
-	time_t interval_passed = 0;
-
-	//map_of_cameras["4"]->model->set_position(map_of_cameras["4"]->login, map_of_cameras["4"]->password, map_of_cameras["4"]->address_IP, 1, map_of_cameras["4"]->vector_of_presets);
 
 	//main loop
 	while (true)
 	{
 		cout << "Surveillance cameras have started partol!" << endl;
-		for (int preset_number = 0; preset_number < Camera::return_max_number_of_presets();preset_number++)
+		for (unsigned int preset_number = 0; preset_number < Camera::get_max_number_of_presets(); preset_number++)
 		{
 			for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 			{
 				if (preset_number < (iterator->second->get_number_of_presets()))
 				{
-					iterator->second->return_model()->set_position(iterator->second->return_login(), iterator->second->return_password(), iterator->second->return_address_IP(), preset_number, iterator->second->return_vector_of_presets());
+					iterator->second->set_position(preset_number);
 				}
 			}
-			interval_start = time(0);
-			interval_passed = 0;
 
-			while (interval_passed < time_for_changing_position)
-			{
-				interval_passed = time(0) - interval_start;
-			}
+			sleep(time_for_changing_position);
+
 			for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 			{
 				if (preset_number < (iterator->second->get_number_of_presets()))
 				{
-					iterator->second->return_model()->get_frame(iterator->second->return_login(), iterator->second->return_password(), iterator->second->return_address_IP());
+					iterator->second->get_frame();
 					//cout << iterator->second->return_address_IP() << "\t" << preset_number << endl;
 				}
 			}
 
 		}
 		cout << "Patrol has already ended!" << endl;
-		
-		interval_start = time(0);
-		interval_passed = 0;
 
 		for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 		{
 			iterator->second->delete_screenshots(time_archiving);
 		}
 
-		while (interval_passed < time_interval)
+		if (argc >= 1) //the option with argc parameters in program call, after one patrol program will be ended
 		{
-			interval_passed = time(0) - interval_start;
+			break; 
 		}
+
+		sleep(time_interval * 1000);
 	}
-	
+
+	//deleting Camera objects
+	for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
+	{
+		delete iterator->second;
+	}
+
 	//Clear
 	map_of_cameras.clear();
+
+	cout << "Program has succesfully ended!" << endl;
 	return 0;
 }
 
-
-void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char *argv[])
+void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, unsigned int argc, char *argv[])
 {
 	ifstream file_config_login;
 	string rubbish_line = "";
@@ -116,7 +125,7 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 
 				if (map_of_cameras.find(ID) != map_of_cameras.end())
 				{
-					string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
+					string s_perror = "Error! Probably in \"Config_login.txt\" are duplicated camera ID: " + ID + " or you typed duplicated parameters!";
 					cout << s_perror << endl;
 					exit(1);
 				}
@@ -130,7 +139,7 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 		// the option with argc parameters in program call
 		else
 		{
-			int number_of_arguments = 0;
+			unsigned int number_of_arguments = 0;
 
 			for (number_of_arguments = 1; number_of_arguments < argc;)
 			{
@@ -176,12 +185,12 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 
 	file_config_login.close();
 }
-int read_config_archiving_intervals(int &time_archiving)
+unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 {
 	//Config_archiving_interval
 	ifstream file_config_archiving_interval;
 
-	int time_interval = 0;
+	unsigned int time_interval = 0;
 
 	//Open Config_archiving_interval
 	file_config_archiving_interval.open("Config_archiving_interval.txt", ios::in);
@@ -199,7 +208,7 @@ int read_config_archiving_intervals(int &time_archiving)
 
 		getline(file_config_archiving_interval, rubbish_line); //Omit additional line in Config_archiving_interval
 
-		for (int i = 0; i < 4; i++)
+		for (unsigned int i = 0; i < 4; i++)
 		{
 			file_config_archiving_interval >> interval[i];
 
@@ -210,7 +219,7 @@ int read_config_archiving_intervals(int &time_archiving)
 			}
 		}
 
-		for (int i = 0; i < 5; i++)
+		for (unsigned int i = 0; i < 5; i++)
 		{
 			file_config_archiving_interval >> archiving[i];
 

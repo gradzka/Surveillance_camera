@@ -69,9 +69,9 @@ void TP_Link::get_frame(string login, string password, string address_IP)
 	system(http_query.c_str());
 }
 
-void TP_Link::set_position(string login, string password, string address_IP, int preset_number, vector <Preset> &vector_of_presets)
+void TP_Link::set_position(string login, string password, string address_IP, unsigned int preset_number, vector <Preset> &vector_of_presets)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/ptzset?gotoserverpresetname=" + vector_of_presets[preset_number].return_preset_name() + "\" --spider 2> NUL";
+	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/ptzset?gotoserverpresetname=" + vector_of_presets[preset_number].get_preset_name() + "\" --spider 2> NUL";
 	//cout << http_query << endl;
 	system(http_query.c_str());
 }

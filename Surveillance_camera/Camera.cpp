@@ -6,33 +6,31 @@ Camera::Camera(string ID, string address_IP, string login, string password, stri
 	this->address_IP = address_IP;
 	this->login = login;
 	this->password = password;
-	this->model = return_camera_model_pointer(model, ID, address_IP, login, password);
+	this->model = get_camera_model_pointer(model, ID, address_IP, login, password);
 }
 
 Camera::~Camera()
 {
-
+	//cout << "Camera with ID: " + ID + " has been deleted succesfully!" << endl;
+	delete model;
+	vector_of_presets.clear();
 }
 
-string Camera::return_ID()
+string Camera::get_ID()
 {
 	return ID;
 }
-string Camera::return_address_IP()
+string Camera::get_address_IP()
 {
 	return address_IP;
 }
-string Camera::return_login()
+string Camera::get_login()
 {
 	return login;
 }
-string Camera::return_password()
+string Camera::get_password()
 {
 	return password;
-}
-Camera_model *Camera::return_model()
-{
-	return model;
 }
 
 #ifdef _WIN32 //If this is Winodows system
@@ -43,7 +41,7 @@ void Camera::create_folder()
 	cout << "Screenshots are saving in the \"Screenshots/" + address_IP + "\"!" << endl;
 }
 
-void Camera::delete_screenshots(int time_archiving)
+void Camera::delete_screenshots(unsigned int time_archiving)
 {
 	_finddata_t danePliku;
 	long uchwyt;
@@ -86,7 +84,7 @@ void Camera::create_folder()
 	cout << "Screenshots are saving in the \"Screenshots/" + address_IP + "\"!" << endl;
 }
 
-void Camera::delete_screenshots(int time_archiving)
+void Camera::delete_screenshots(unsigned int time_archiving)
 {
 	DIR *directory;
 	struct dirent *file_screenshot;
@@ -127,7 +125,7 @@ void Camera::delete_screenshots(int time_archiving)
 }
 #endif
 
-Camera_model* Camera::return_camera_model_pointer(string model, string ID, string address_IP, string login, string password)
+Camera_model* Camera::get_camera_model_pointer(string model, string ID, string address_IP, string login, string password)
 {
 	Camera_model *camera_model;
 
@@ -157,17 +155,26 @@ Camera_model* Camera::return_camera_model_pointer(string model, string ID, strin
 	return camera_model;
 }
 
-int Camera::get_number_of_presets()
+unsigned int Camera::get_number_of_presets()
 {
 	return vector_of_presets.size();
 }
 
-int Camera::return_max_number_of_presets()
+void Camera::get_frame()
+{
+	model->get_frame(login, password, address_IP);
+}
+void Camera::set_position(unsigned int preset_number)
+{
+	model->set_position(login, password, address_IP, preset_number, vector_of_presets);
+}
+
+unsigned int Camera::get_max_number_of_presets()
 {
 	return max_number_of_presets;
 }
 
-vector <Preset> Camera::return_vector_of_presets()
+vector <Preset> Camera::get_vector_of_presets()
 {
 	return vector_of_presets;
 }

@@ -15,10 +15,12 @@
 
 #ifdef _WIN32 //If this is Winodows system
 #include "io.h"
+#include <windows.h>
 #pragma warning (disable:4996)
 #else
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 using namespace std;
@@ -32,23 +34,26 @@ private:
 	string password;
 	vector <Preset> vector_of_presets;
 	Camera_model *model;
-	static int max_number_of_presets;
+	static unsigned int max_number_of_presets;
 public:
 	Camera(string ID, string address_IP, string login, string password, string model);
 	~Camera();
-	//access to private fields
-	string return_ID();
-	string return_address_IP();
-	string return_login();
-	string return_password();
-	vector <Preset> return_vector_of_presets();
-	Camera_model *return_model();
+	//access to private fields  //zamiast return get
+	string get_ID();
+	string get_address_IP();
+	string get_login();
+	string get_password();
+	vector <Preset> get_vector_of_presets();
 
 	void create_folder();
-	void delete_screenshots(int time_archiving);
-	int get_number_of_presets();
-	static int return_max_number_of_presets();
+	void delete_screenshots(unsigned int time_archiving);
+	unsigned int get_number_of_presets();
+	static unsigned int get_max_number_of_presets();
+
+	void get_frame();
+	void set_position(unsigned int preset_number);
+
 private:
-	Camera_model *return_camera_model_pointer(string model, string ID, string address_IP, string login, string password);
+	Camera_model *get_camera_model_pointer(string model, string ID, string address_IP, string login, string password);
 };
 
