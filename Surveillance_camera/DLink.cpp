@@ -22,12 +22,12 @@ void DLink::help_fill_vector_of_presets(string &line_in_file, char *char_line_in
 	{
 		if (No_or_preset_name == true)
 		{
-			loaded_preset.No = substring_of_char_line_in_file;
+			loaded_preset.set_No(substring_of_char_line_in_file);
 			No_or_preset_name = false;
 		}
 		else
 		{
-			loaded_preset.preset_name = substring_of_char_line_in_file;
+			loaded_preset.set_preset_name(substring_of_char_line_in_file);
 			No_or_preset_name = true;
 			vector_of_presets.push_back(loaded_preset);
 		}
@@ -90,7 +90,7 @@ void DLink::get_frame(string login, string password, string address_IP)
 
 void DLink::set_position(string login, string password, string address_IP, int preset_number, vector <Preset> &vector_of_presets)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/longcctvpst.cgi?action=goto&name=" + vector_of_presets[preset_number].preset_name + "&number=" + vector_of_presets[preset_number].No + "\" --spider 2> NUL";
+	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/longcctvpst.cgi?action=goto&name=" + vector_of_presets[preset_number].return_preset_name() + "&number=" + vector_of_presets[preset_number].return_No() + "\" --spider 2> NUL";
 	//cout << http_query << endl;
 	system(http_query.c_str());
 }

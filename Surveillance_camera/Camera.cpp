@@ -14,6 +14,27 @@ Camera::~Camera()
 
 }
 
+string Camera::return_ID()
+{
+	return ID;
+}
+string Camera::return_address_IP()
+{
+	return address_IP;
+}
+string Camera::return_login()
+{
+	return login;
+}
+string Camera::return_password()
+{
+	return password;
+}
+Camera_model *Camera::return_model()
+{
+	return model;
+}
+
 #ifdef _WIN32 //If this is Winodows system
 void Camera::create_folder()
 {

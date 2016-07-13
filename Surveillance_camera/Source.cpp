@@ -2,7 +2,7 @@
 #include <fstream>
 #include <map>
 #include "time.h"
-#include <Windows.h>
+
 #include "Camera.h"
 #include "DLink.h"
 #include "TP_Link.h"
@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 	fill_map_of_cameras(map_of_cameras, argc, argv);
 
 	map<string, Camera *>::iterator iterator;
+
 	for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 	{
 		iterator->second->create_folder();
@@ -41,12 +42,13 @@ int main(int argc, char *argv[])
 	{
 		for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 		{
-			iterator->second->model->get_frame(iterator->second->login, iterator->second->password, iterator->second->address_IP);
+			iterator->second->return_model()->get_frame(iterator->second->return_login(), iterator->second->return_password(), iterator->second->return_address_IP());
 			iterator->second->delete_screenshots(time_archiving);
 		}
 
 		interval_start = time(0);
 		interval_passed = 0;
+
 		while (interval_passed < time_interval)
 		{
 			interval_passed = time(0) - interval_start;
@@ -81,6 +83,7 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 			while (!file_config_login.eof())
 			{
 				file_config_login >> ID >> address_IP >> login >> password >> model;
+
 				if (map_of_cameras.find(ID) != map_of_cameras.end())
 				{
 					string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
@@ -93,10 +96,12 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 
 			}
 		}
+
 		// the option with argc parameters in program call
 		else
 		{
 			int number_of_arguments = 0;
+
 			for (number_of_arguments = 1; number_of_arguments < argc;)
 			{
 				file_config_login >> ID >> address_IP >> login >> password >> model;
@@ -167,6 +172,7 @@ int read_config_archiving_intervals(int &time_archiving)
 		for (int i = 0; i < 4; i++)
 		{
 			file_config_archiving_interval >> interval[i];
+
 			if (interval[0] == "a")
 			{
 				perror("Error in order in the \"file_config_archiving_interval.txt\"");
@@ -177,6 +183,7 @@ int read_config_archiving_intervals(int &time_archiving)
 		for (int i = 0; i < 5; i++)
 		{
 			file_config_archiving_interval >> archiving[i];
+
 			if (archiving[0] == "i")
 			{
 				perror("Error in order in the \"file_config_archiving_interval.txt\"");
