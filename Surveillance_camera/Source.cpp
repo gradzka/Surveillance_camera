@@ -11,12 +11,12 @@ using namespace std;
 #define time_for_changing_position 5000
 
 #ifdef _WIN32
-void sleep_now(unsigned milliseconds)
+void sleep_now(unsigned int milliseconds)
 {
 	Sleep(milliseconds);
 }
 #else
-void sleep_now(unsigned milliseconds)
+void sleep_now(unsigned int milliseconds)
 {
 	usleep(milliseconds * 1000); //takes microseconds
 }
@@ -26,6 +26,7 @@ unsigned int Camera::max_number_of_presets = 0;
 
 void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char *argv[]);
 unsigned int read_config_archiving_intervals(unsigned int &time_archiving); //returns time that 
+bool has_non_digit(const char *str);
 
 int main(int argc, char *argv[])
 {
@@ -184,7 +185,7 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 
 	file_config_login.close();
 }
-bool HasSpecialCharacters(const char *str)
+bool has_non_digit(const char *str)
 {
 	if (strspn(str, "0123456789") == strlen(str)) return true;
 	else
@@ -229,7 +230,7 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 				cout << "Error in order in the \"file_config_archiving_interval.txt\"" << endl;
 				exit(1);
 			}
-			else if (HasSpecialCharacters(interval[i].c_str()) == false && i!=0)
+			else if (has_non_digit(interval[i].c_str()) == false && i != 0)
 			{
 				cout << "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!" << endl;
 				exit(1);
@@ -246,7 +247,7 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 				cout << "Error in order in the \"file_config_archiving_interval.txt\"" << endl;
 				exit(1);
 			}
-			else if (HasSpecialCharacters(archiving[i].c_str()) == false && i!=0)
+			else if (has_non_digit(archiving[i].c_str()) == false && i != 0)
 			{
 				cout << "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!" << endl;
 				exit(1);
@@ -262,5 +263,6 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 		//Close Config_archiving_interval
 		file_config_archiving_interval.close();
 	}
+
 	return time_interval;
 }

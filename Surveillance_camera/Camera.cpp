@@ -11,7 +11,7 @@ Camera::Camera(string ID, string address_IP, string login, string password, stri
 
 Camera::~Camera()
 {
-	cout << "Camera with ID: " + ID + " has been deleted succesfully!" << endl;
+	//cout << "Camera with ID: " + ID + " has been deleted succesfully!" << endl;
 	delete model;
 	vector_of_presets.clear();
 }

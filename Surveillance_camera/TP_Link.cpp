@@ -66,13 +66,13 @@ void TP_Link::fill_vector_of_presets(string login, string password, string addre
 		}
 
 	file_config_presets.close();
-	/*
+	
 	if (remove(filename_config_presets.c_str()) != 0)
 	{
 		cout << filename_config_presets.c_str() << endl;
 		perror("Error deleting file\n");
 		exit(1);
-	}*/
+	}
 
 	}
 	else
