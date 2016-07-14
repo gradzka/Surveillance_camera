@@ -53,9 +53,7 @@ bool DLink::check_connection(string login, string password, string address_IP)
 		file_check.close();
 		if (remove("TMP.jpg") != 0)
 		{
-			cout << "TMP.jpg" << endl;
-			perror("Error deleting file\n");
-			exit(1);
+			throw "Error deleting file TMP.jpg\n";
 		}
 		
 		return false;
@@ -65,9 +63,7 @@ bool DLink::check_connection(string login, string password, string address_IP)
 		file_check.close();
 		if (remove("TMP.jpg") != 0)
 		{
-			cout << "TMP.jpg" << endl;
-			perror("Error deleting file\n");
-			exit(1);
+			throw "Error deleting file TMP.jpg\n";
 		}
 
 		return true;
@@ -78,32 +74,35 @@ void DLink::fill_vector_of_presets(string login, string password, string address
 {
 	string http_query = "wget --tries=2 \"http://" + address_IP + "/ptz_dlink.js?2.1.25\" -O Config_presets_" + address_IP + ".txt 2> NUL";
 	system(http_query.c_str());
+	string filename_config_presets = "Config_presets_" + address_IP + ".txt";
 	//
 	if (check_connection(login, password, address_IP) == false)
 	{
-		cout << "\nCan't connect with " + address_IP + ". Check your Internet connection or IP address in \"Config_login.txt\"!" << endl;
-		exit(1);
+		string perror = "\nCan't connect with " + address_IP + ". Check your Internet connection or IP address in \"Config_login.txt\"!\n";
+		if (remove(filename_config_presets.c_str()) != 0)
+		{
+			perror = perror + filename_config_presets + "Error deleting file\n";
+		}
+		throw perror;
 	}
 	else
 	{
 		//
 		ifstream file_config_presets;
-		string filename_config_presets = "Config_presets_" + address_IP + ".txt";
 		file_config_presets.open(filename_config_presets.c_str(), ios::in);
 
 		if (file_config_presets.good())
 		{
 			if (is_file_empty(file_config_presets) == true)
 			{
-				cout << "\nCan't connect with " + address_IP + ". Check your Internet connection or IP address in \"Config_login.txt\"!" << endl;
+				string perror = "\nCan't connect with " + address_IP + ". Check your Internet connection or IP address in \"Config_login.txt\"!\n";
 				file_config_presets.close();
 				if (remove(filename_config_presets.c_str()) != 0)
 				{
-					cout << filename_config_presets.c_str() << endl;
-					perror("Error deleting file\n");
-					exit(1);
+					perror = perror + filename_config_presets + "Error deleting file\n";
 				}
-				exit(1);
+
+				throw perror;
 			}
 
 			string line_in_file = "";
@@ -134,9 +133,8 @@ void DLink::fill_vector_of_presets(string login, string password, string address
 
 						if (remove(filename_config_presets.c_str()) != 0)
 						{
-						cout << filename_config_presets.c_str() << endl;
-						perror("Error deleting file\n");
-						exit(1);
+						string perror = filename_config_presets + "Error deleting file\n";
+						throw perror;
 						}
 					break;
 				}
@@ -144,8 +142,7 @@ void DLink::fill_vector_of_presets(string login, string password, string address
 		}
 		else
 		{
-			perror("Error! It is problem with Config_presets_IP.txt file");
-			exit(1);
+			throw "Error! It is problem with Config_presets_IP.txt file\n";
 		}
 	}
 }

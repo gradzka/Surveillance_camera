@@ -34,59 +34,93 @@ int main(int argc, char *argv[])
 	unsigned int time_archiving = 0;
 	unsigned int time_interval = 0;
 
-	time_interval = read_config_archiving_intervals(time_archiving);
-	//cout << "T_A: " << time_archiving << " T_I: " << time_interval << endl;
-
-	map <string, Camera *> map_of_cameras; //map of pointers to Camera_model objects
-	fill_map_of_cameras(map_of_cameras, argc, argv); 
-
-	map<string, Camera *>::iterator iterator;
-	for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
+	try
 	{
-		iterator->second->create_folder();
+		time_interval = read_config_archiving_intervals(time_archiving);
+		//cout << "T_A: " << time_archiving << " T_I: " << time_interval << endl;
+	}
+	catch (const char * perror)
+	{
+		cout << perror;
+		exit(1);
+	}
+	catch (string perror)
+	{
+		cout << perror;
+		exit(1);
+	}
+	catch (...)
+	{
+		cout << "Undefined error!\n";
+		exit(1);
 	}
 
-	//main loop
-	while (true)
+		map <string, Camera *> map_of_cameras; //map of pointers to Camera_model objects
+		map<string, Camera *>::iterator iterator;
+	try
 	{
-		cout << "Surveillance cameras have started partol!" << endl;
-		for (unsigned int preset_number = 0; preset_number < Camera::get_max_number_of_presets(); preset_number++)
-		{
-			for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
-			{
-				if (preset_number < (iterator->second->get_number_of_presets()))
-				{
-					iterator->second->set_position(preset_number);
-				}
-			}
-
-			sleep_now(time_for_changing_position);
-
-			for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
-			{
-				if (preset_number < (iterator->second->get_number_of_presets()))
-				{
-					iterator->second->get_frame();
-					//cout << iterator->second->return_address_IP() << "\t" << preset_number << endl;
-				}
-			}
-
-		}
-		cout << "Patrol has already ended!" << endl;
+		fill_map_of_cameras(map_of_cameras, argc, argv);
 
 		for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 		{
-			iterator->second->delete_screenshots(time_archiving);
+			iterator->second->create_folder();
 		}
 
-		if (argc > 1) //the option with argc parameters in program call, after one patrol program will be ended
+		//main loop
+		while (true)
 		{
-			break; 
+			cout << "Surveillance cameras have started partol!" << endl;
+			for (unsigned int preset_number = 0; preset_number < Camera::get_max_number_of_presets(); preset_number++)
+			{
+				for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
+				{
+					if (preset_number < (iterator->second->get_number_of_presets()))
+					{
+						iterator->second->set_position(preset_number);
+					}
+				}
+
+				sleep_now(time_for_changing_position);
+
+				for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
+				{
+					if (preset_number < (iterator->second->get_number_of_presets()))
+					{
+						iterator->second->get_frame();
+						//cout << iterator->second->return_address_IP() << "\t" << preset_number << endl;
+					}
+				}
+
+			}
+			cout << "Patrol has already ended!" << endl;
+
+			for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
+			{
+				iterator->second->delete_screenshots(time_archiving);
+			}
+
+			if (argc > 1) //the option with argc parameters in program call, after one patrol program will be ended
+			{
+				break;
+			}
+
+			sleep_now(time_interval * 1000);
 		}
 
-		sleep_now(time_interval * 1000);
 	}
-
+	catch (const char *perror)
+	{
+		cout << perror;
+	}
+	catch (string perror)
+	{
+		cout << perror;
+	}
+	catch (...)
+	{
+		cout << "Undefined error!\n";
+	}
+	
 	//deleting Camera objects
 	for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 	{
@@ -96,7 +130,7 @@ int main(int argc, char *argv[])
 	//Clear
 	map_of_cameras.clear();
 
-	cout << "Program has succesfully ended!" << endl;
+	cout << "Program has ended!" << endl;
 	return 0;
 }
 
@@ -125,9 +159,8 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 
 				if (map_of_cameras.find(ID) != map_of_cameras.end())
 				{
-					string s_perror = "Error! Probably in \"Config_login.txt\" are duplicated camera ID: " + ID + " or you typed duplicated parameters!";
-					cout << s_perror << endl;
-					exit(1);
+					string perror = "Error! Probably in \"Config_login.txt\" are duplicated camera ID: " + ID + " or you typed duplicated parameters!\n";
+					throw perror;
 				}
 
 				Camera *camera = new Camera(ID, address_IP, login, password, model);
@@ -148,9 +181,8 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 				{
 					if (map_of_cameras.find(ID) != map_of_cameras.end())
 					{
-						string s_perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID;
-						cout << s_perror << endl;
-						exit(1);
+						string perror = "Error!In \"Config_login.txt\" are duplicated camera ID: " + ID + "\n";
+						throw perror;
 					}
 
 					Camera *camera = new Camera(ID, address_IP, login, password, model);
@@ -173,14 +205,12 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 	}
 	else
 	{
-		perror("Error with \"Config_login.txt\"");
-		exit(1);
+		throw "Error with \"Config_login.txt\"\n";
 	}
 
 	if (map_of_cameras.empty() == true)
 	{
-		cout << "Error! The <map_of_cameras> is empty! Problably \"Config_login\" is not filled" << endl;
-		exit(1);
+		throw "Error! The <map_of_cameras> is empty! Problably \"Config_login\" is not filled\n";
 	}
 
 	file_config_login.close();
@@ -210,8 +240,7 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 
 	if (file_config_archiving_interval.good() == false)
 	{
-		perror("Error with \"Config_archiving_interval.txt\"");
-		exit(1);
+		throw "Error with \"Config_archiving_interval.txt\"\n";
 	}
 	else 
 	{
@@ -227,13 +256,11 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 
 			if (interval[0] != "i")
 			{
-				cout << "Error in order in the \"file_config_archiving_interval.txt\"" << endl;
-				exit(1);
+				throw "Error in order in the \"file_config_archiving_interval.txt\"\n";
 			}
 			else if (has_non_digit(interval[i].c_str()) == false && i != 0)
 			{
-				cout << "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!" << endl;
-				exit(1);
+				throw "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!\n";
 			}
 			
 		}
@@ -244,13 +271,11 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 
 			if (archiving[0] != "a")
 			{
-				cout << "Error in order in the \"file_config_archiving_interval.txt\"" << endl;
-				exit(1);
+				throw "Error in order in the \"file_config_archiving_interval.txt\"\n";
 			}
 			else if (has_non_digit(archiving[i].c_str()) == false && i != 0)
 			{
-				cout << "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!" << endl;
-				exit(1);
+				throw "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!\n";
 			}
 		}
 

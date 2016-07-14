@@ -50,9 +50,8 @@ void Camera::delete_screenshots(unsigned int time_archiving)
 
 	if ((uchwyt = _findfirst(name_of_the_screenshot.c_str(), &danePliku)) == -1)
 	{
-		cout << name_of_the_screenshot.c_str() << endl;
-		perror("File not found!\n");
-		exit(1);
+		string perror = name_of_the_screenshot + " File not found!\n";
+		throw perror;
 	}
 
 	do
@@ -63,9 +62,8 @@ void Camera::delete_screenshots(unsigned int time_archiving)
 			name_of_the_screenshot = "Screenshots/" + address_IP + "/" + danePliku.name;
 			if (remove(name_of_the_screenshot.c_str()) != 0)
 			{
-				cout << name_of_the_screenshot.c_str() << endl;
-				perror("Error deleting file\n");
-				exit(1);
+				string perror = name_of_the_screenshot + " Error deleting file\n";
+				throw perror;
 			}
 }
 		//cout << danePliku.name << "\t" << danePliku.time_write << endl;
@@ -106,9 +104,8 @@ void Camera::delete_screenshots(unsigned int time_archiving)
 
 				if (stat(path, &st))
 				{
-					cout << file_screenshot->d_name << endl;
-					perror("Error deleting file\n");
-					exit(1);
+					string perror = name_of_the_screenshot + " Error deleting file\n";
+					throw perror;
 				}
 				else
 				{
@@ -139,8 +136,8 @@ Camera_model* Camera::get_camera_model_pointer(string model, string ID, string a
 	}
 	else
 	{
-		cout << model + " is undefined in camera_model! Please define it in code!" << endl;
-		exit(1);
+		string perror = model + "  is undefined in camera_model! Please define it in code!\n";
+		throw perror;
 	}
 
 	cout << "Connecting with " + address_IP + "...\t";
