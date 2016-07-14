@@ -12,6 +12,15 @@ First step in this project was to capture screenshots from IP cameras. If you lo
 
 ##How to run
 
+###Windows
+
+- download the latest wget version
+- make sure if the name of application is "wget.exe"; if not, change name into "wget.exe"
+- ...
+
+###Linux
+- download the latest wget version: sudo apt-get install wget
+- ...
 
 ##Attributions
 - http://gnuwin32.sourceforge.net/packages/wget.htm
