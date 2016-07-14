@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	//cout << "T_A: " << time_archiving << " T_I: " << time_interval << endl;
 
 	map <string, Camera *> map_of_cameras; //map of pointers to Camera_model objects
-	fill_map_of_cameras(map_of_cameras, argc, argv);
+	fill_map_of_cameras(map_of_cameras, argc, argv); 
 
 	map<string, Camera *>::iterator iterator;
 	for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
@@ -184,6 +184,19 @@ void fill_map_of_cameras(map <string, Camera *> &map_of_cameras, int argc, char 
 
 	file_config_login.close();
 }
+bool HasSpecialCharacters(const char *str)
+{
+	if (strspn(str, "0123456789") == strlen(str)) return true;
+	else
+	{
+		return false;
+	}
+	//if there is a digit or digits that "0123456789" doesn't include
+	//strspn return the index of first appearance of incorrect digit
+
+	//if everything is ok strspn return the length of str
+	//so str[length(str)] is \0
+}
 unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 {
 	//Config_archiving_interval
@@ -213,9 +226,15 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 
 			if (interval[0] != "i")
 			{
-				perror("Error in order in the \"file_config_archiving_interval.txt\"");
+				cout << "Error in order in the \"file_config_archiving_interval.txt\"" << endl;
 				exit(1);
 			}
+			else if (HasSpecialCharacters(interval[i].c_str()) == false && i!=0)
+			{
+				cout << "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!" << endl;
+				exit(1);
+			}
+			
 		}
 
 		for (unsigned int i = 0; i < 5; i++)
@@ -224,7 +243,12 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 
 			if (archiving[0] != "a")
 			{
-				perror("Error in order in the \"file_config_archiving_interval.txt\"");
+				cout << "Error in order in the \"file_config_archiving_interval.txt\"" << endl;
+				exit(1);
+			}
+			else if (HasSpecialCharacters(archiving[i].c_str()) == false && i!=0)
+			{
+				cout << "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!" << endl;
 				exit(1);
 			}
 		}
