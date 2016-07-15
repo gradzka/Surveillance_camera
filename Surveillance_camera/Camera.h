@@ -35,10 +35,11 @@ private:
 	vector <Preset> vector_of_presets;
 	Camera_model *model;
 	static unsigned int max_number_of_presets;
+
 public:
 	Camera(string ID, string address_IP, string login, string password, string model);
 	~Camera();
-	//access to private fields  //zamiast return get
+	//access to private fields  
 	string get_ID();
 	string get_address_IP();
 	string get_login();
@@ -56,4 +57,3 @@ public:
 private:
 	Camera_model *get_camera_model_pointer(string model, string ID, string address_IP, string login, string password);
 };
-

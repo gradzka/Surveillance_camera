@@ -90,7 +90,6 @@ void Camera::delete_screenshots(unsigned int time_archiving)
 	strcat(folderName, address_IP.c_str());
 	strcat(folderName, "/");
 	char path[60];
-
 	directory = opendir(folderName);
 	if (directory != NULL)
 	{
@@ -104,7 +103,8 @@ void Camera::delete_screenshots(unsigned int time_archiving)
 
 				if (stat(path, &st))
 				{
-					string perror = name_of_the_screenshot + " Error deleting file\n";
+					char *perror = file_screenshot->d_name;
+					strcat(perror, " Error deleting file\n");
 					throw perror;
 				}
 				else
@@ -112,13 +112,13 @@ void Camera::delete_screenshots(unsigned int time_archiving)
 					if ((time(0) - (long long)st.st_mtim.tv_sec) > time_archiving)
 					{
 						remove(path);
-						//cout<<time(0)-(long long)st.st_mtim.tv_sec<<endl;
 					}
 				}
 			}
 		}
 		closedir(directory);
 	}
+
 }
 #endif
 
@@ -136,11 +136,11 @@ Camera_model* Camera::get_camera_model_pointer(string model, string ID, string a
 	}
 	else
 	{
-		string perror = model + "  is undefined in camera_model! Please define it in code!\n";
+		string perror = model + " is undefined in camera_model! Please define it in code!\n";
 		throw perror;
 	}
 
-	cout << "Connecting with " + address_IP + "...\t";
+	cout << "Connecting with " + address_IP + "..."<<endl;
 	camera_model->fill_vector_of_presets(login, password, address_IP, vector_of_presets);
 	cout << "Connected successfully!" << endl;
 	//cout << address_IP << "\t" << get_number_of_presets() << endl;

@@ -41,3 +41,28 @@ bool Camera_model::is_file_empty(ifstream &file)
 	}
 	
 }
+
+#ifdef _WIN32
+
+void Camera_model::find_path_to_wget()
+{
+	cout << "Please wait, program will finish searching \"WGET_DIR\" environment variable soon\n";
+	
+	char *value_of_variable = NULL;
+	value_of_variable = getenv("WGET_DIR");
+	if (value_of_variable != NULL)
+	{
+		string str_value_of_variable(value_of_variable);
+		str_value_of_variable += "\\";
+		path_to_wget = str_value_of_variable;
+		cout << "Program found \"WGET_DIR\" environment variable!\n";
+	}
+	else
+	{
+		throw "Error! Can't find \"WGET_DIR\" environment variable!\n";
+	}
+}
+
+#endif
+
+string Camera_model::path_to_wget = "";

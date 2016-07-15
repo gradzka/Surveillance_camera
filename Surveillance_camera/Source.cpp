@@ -15,11 +15,14 @@ void sleep_now(unsigned int milliseconds)
 {
 	Sleep(milliseconds);
 }
+string Camera_model::quiet_wget = " 2> NUL";
+
 #else
 void sleep_now(unsigned int milliseconds)
 {
 	usleep(milliseconds * 1000); //takes microseconds
 }
+string Camera_model::quiet_wget = " 2>/dev/null";
 #endif
 
 unsigned int Camera::max_number_of_presets = 0;
@@ -36,22 +39,28 @@ int main(int argc, char *argv[])
 
 	try
 	{
+#ifdef _WIN32
+		Camera_model::find_path_to_wget();
+#endif
 		time_interval = read_config_archiving_intervals(time_archiving);
 		//cout << "T_A: " << time_archiving << " T_I: " << time_interval << endl;
 	}
 	catch (const char * perror)
 	{
 		cout << perror;
+		cout << "Program has ended!" << endl;
 		exit(1);
 	}
 	catch (string perror)
 	{
 		cout << perror;
+		cout << "Program has ended!" << endl;
 		exit(1);
 	}
 	catch (...)
 	{
 		cout << "Undefined error!\n";
+		cout << "Program has ended!" << endl;
 		exit(1);
 	}
 

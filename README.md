@@ -29,6 +29,7 @@ First step in this project was to capture screenshots from IP cameras. If you lo
 - http://stackoverflow.com/questions/6605282/how-can-i-check-if-a-string-has-special-characters-in-c-effectively/6605305#6605305
 - http://stackoverflow.com/questions/1658386/sleep-function-in-c/1658429#1658429
 - http://cboard.cprogramming.com/c-programming/76434-time-filename.html#post541515
+- http://www.cplusplus.com/reference/cstdlib/getenv/
 
 ##License
 MIT

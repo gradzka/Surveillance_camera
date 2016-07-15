@@ -42,7 +42,7 @@ bool DLink::check_connection(string login, string password, string address_IP)
 	//if frame is empty login data is incorrect
 	//this frame is only temporary, it must be deleted
 
-	http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/dms\" -O TMP.jpg 2> NUL";
+	http_query = path_to_wget + "wget --tries=1 --timeout=10 \"http://" + login + ":" + password + "@" + address_IP + "/dms\" -O TMP.jpg" + quiet_wget;
 	system(http_query.c_str());
 
 	file_check.open("TMP.jpg", ios::in);
@@ -72,7 +72,7 @@ bool DLink::check_connection(string login, string password, string address_IP)
 }
 void DLink::fill_vector_of_presets(string login, string password, string address_IP, vector <Preset> &vector_of_presets)
 {
-	string http_query = "wget --tries=2 \"http://" + address_IP + "/ptz_dlink.js?2.1.25\" -O Config_presets_" + address_IP + ".txt 2> NUL";
+	string http_query = path_to_wget + "wget --tries=1 --timeout=10 \"http://" + address_IP + "/ptz_dlink.js?2.1.25\" -O Config_presets_" + address_IP + ".txt" + quiet_wget;
 	system(http_query.c_str());
 	string filename_config_presets = "Config_presets_" + address_IP + ".txt";
 	//
@@ -95,7 +95,7 @@ void DLink::fill_vector_of_presets(string login, string password, string address
 		{
 			if (is_file_empty(file_config_presets) == true)
 			{
-				string perror = "\nCan't connect with " + address_IP + ". Check your Internet connection or IP address in \"Config_login.txt\"!\n";
+				string perror = "Can't connect with " + address_IP + ". Check your Internet connection or IP address in \"Config_login.txt\"!\n";
 				file_config_presets.close();
 				if (remove(filename_config_presets.c_str()) != 0)
 				{
@@ -142,20 +142,20 @@ void DLink::fill_vector_of_presets(string login, string password, string address
 		}
 		else
 		{
-			throw "Error! It is problem with Config_presets_IP.txt file\n";
+			throw "Error! Can't download list of preset. Check if you have wget installed or \"WGET_DIR\" environment variable!\n set properly!\n";
 		}
 	}
 }
 void DLink::get_frame(string login, string password, string address_IP)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/dms\" -O " + get_filename(address_IP) + " 2> NUL";
+	string http_query = path_to_wget + "wget --tries=1 --timeout=10 \"http://" + login + ":" + password + "@" + address_IP + "/dms\" -O " + get_filename(address_IP) + quiet_wget;
 	//cout << http_query << endl;
 	system(http_query.c_str());
 }
 
 void DLink::set_position(string login, string password, string address_IP, unsigned int preset_number, vector <Preset> &vector_of_presets)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/longcctvpst.cgi?action=goto&name=" + vector_of_presets[preset_number].get_preset_name() + "&number=" + vector_of_presets[preset_number].get_No() + "\" --spider 2> NUL";
+	string http_query = path_to_wget + "wget --tries=1 --timeout=10 \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/longcctvpst.cgi?action=goto&name=" + vector_of_presets[preset_number].get_preset_name() + "&number=" + vector_of_presets[preset_number].get_No() + "\" --spider" + quiet_wget;
 	//cout << http_query << endl;
 	system(http_query.c_str());
 }

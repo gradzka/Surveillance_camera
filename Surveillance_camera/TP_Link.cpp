@@ -10,9 +10,9 @@ TP_Link::~TP_Link()
 
 void TP_Link::fill_vector_of_presets(string login, string password, string address_IP, vector <Preset> &vector_of_presets)
 {
-	string http_query = "wget --tries=2 \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/param?action=list&group=PTZ.PresetPos\" -O Config_presets_" + address_IP + ".txt 2> NUL";
+	string http_query = path_to_wget+"wget --tries=1 --timeout=10 \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/param?action=list&group=PTZ.PresetPos\" -O Config_presets_" + address_IP + ".txt" + quiet_wget;
 	system(http_query.c_str());
-
+	
 	ifstream file_config_presets;
 	string filename_config_presets="Config_presets_" + address_IP + ".txt";
 	file_config_presets.open(filename_config_presets.c_str(), ios::in);
@@ -21,7 +21,7 @@ void TP_Link::fill_vector_of_presets(string login, string password, string addre
 	{
 		if (is_file_empty(file_config_presets) == true)
 		{
-			string perror= "\nCan't connect with " + address_IP + ". Check your Internet connection or data in \"Config_login.txt\"!\n";
+			string perror= "Can't connect with " + address_IP + ". Check your Internet connection or data in \"Config_login.txt\"!\n";
 			file_config_presets.close();
 			if (remove(filename_config_presets.c_str()) != 0)
 			{
@@ -74,19 +74,19 @@ void TP_Link::fill_vector_of_presets(string login, string password, string addre
 	}
 	else
 	{
-		throw "Error! Can't download list of preset. Check if you have wget installed!\n";
+		throw "Error! Can't download list of preset. Check if you have wget installed or \"WGET_DIR\" environment variable!\n set properly!\n";
 	}
 	
 }
 void TP_Link::get_frame(string login, string password, string address_IP)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/jpg/image.jpg\" -O " + get_filename(address_IP) + " 2> NUL";
+	string http_query = path_to_wget + "wget --tries=1 --timeout=10 \"http://" + login + ":" + password + "@" + address_IP + "/jpg/image.jpg\" -O " + get_filename(address_IP) + quiet_wget;
 	system(http_query.c_str());
 }
 
 void TP_Link::set_position(string login, string password, string address_IP, unsigned int preset_number, vector <Preset> &vector_of_presets)
 {
-	string http_query = "wget \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/ptzset?gotoserverpresetname=" + vector_of_presets[preset_number].get_preset_name() + "\" --spider 2> NUL";
+	string http_query = path_to_wget + "wget --tries=1 --timeout=10 \"http://" + login + ":" + password + "@" + address_IP + "/cgi-bin/operator/ptzset?gotoserverpresetname=" + vector_of_presets[preset_number].get_preset_name() + "\" --spider" + quiet_wget;
 	//cout << http_query << endl;
 	system(http_query.c_str());
 }
