@@ -3,10 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <string.h>
-#include <stdlib.h>
 #include "time.h"
-
 #include "Preset.h"
 
 #pragma warning (disable:4996)

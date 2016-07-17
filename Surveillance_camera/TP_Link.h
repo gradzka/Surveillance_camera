@@ -1,5 +1,7 @@
 #pragma once
 #include "Camera_model.h"
+#include <stdlib.h>
+#include <string.h>
 
 class TP_Link :
 	public Camera_model

@@ -1,6 +1,8 @@
-#include <iostream>
+#include <chrono>
 #include <fstream>
+#include <iostream>
 #include <map>
+#include <thread>
 
 #include "Camera.h"
 #include "DLink.h"
@@ -11,17 +13,8 @@ using namespace std;
 #define time_for_changing_position 5000
 
 #ifdef _WIN32
-void sleep_now(unsigned int milliseconds)
-{
-	Sleep(milliseconds);
-}
 string Camera_model::quiet_wget = " 2> NUL";
-
 #else
-void sleep_now(unsigned int milliseconds)
-{
-	usleep(milliseconds * 1000); //takes microseconds
-}
 string Camera_model::quiet_wget = " 2>/dev/null";
 #endif
 
@@ -45,7 +38,7 @@ int main(int argc, char *argv[])
 		time_interval = read_config_archiving_intervals(time_archiving);
 		//cout << "T_A: " << time_archiving << " T_I: " << time_interval << endl;
 	}
-	catch (const char * perror)
+	catch (const char *perror)
 	{
 		cout << perror;
 		cout << "Program has ended!" << endl;
@@ -75,6 +68,9 @@ int main(int argc, char *argv[])
 			iterator->second->create_folder();
 		}
 
+		std::chrono::milliseconds duration_for_changing_position(time_for_changing_position);
+		std::chrono::milliseconds duration_for_time_interval(time_interval * 1000);
+
 		//main loop
 		while (true)
 		{
@@ -89,7 +85,7 @@ int main(int argc, char *argv[])
 					}
 				}
 
-				sleep_now(time_for_changing_position);
+				std::this_thread::sleep_for(duration_for_changing_position);
 
 				for (iterator = map_of_cameras.begin(); iterator != map_of_cameras.end(); iterator++)
 				{
@@ -113,7 +109,7 @@ int main(int argc, char *argv[])
 				break;
 			}
 
-			sleep_now(time_interval * 1000);
+			std::this_thread::sleep_for(duration_for_time_interval);
 		}
 
 	}
@@ -237,6 +233,17 @@ bool has_non_digit(const char *str)
 	//if everything is ok strspn return the length of str
 	//so str[length(str)] is \0
 }
+void fill_interval_and_archiving_tables(ifstream &file_config_archiving_interval, string *interval_or_archiving)
+{
+	for (unsigned int i = 0; i <= 3; i++)
+	{
+		file_config_archiving_interval >> interval_or_archiving[i];
+		if (has_non_digit(interval_or_archiving[i].c_str()) == false)
+		{
+			throw "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!\n";
+		}
+	}
+}
 unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 {
 	//Config_archiving_interval
@@ -254,42 +261,41 @@ unsigned int read_config_archiving_intervals(unsigned int &time_archiving)
 	else 
 	{
 		string rubbish_line = "";
-		string *interval = new string[5];
-		string *archiving = new string[6];
+		string *interval = new string[4];
+		string *archiving = new string[4];
 
 		getline(file_config_archiving_interval, rubbish_line); //Omit additional line in Config_archiving_interval
 
-		for (unsigned int i = 0; i < 4; i++)
-		{
-			file_config_archiving_interval >> interval[i];
+		string i_or_a = "";
 
-			if (interval[0] != "i")
-			{
-				throw "Error in order in the \"file_config_archiving_interval.txt\"\n";
+		file_config_archiving_interval >> i_or_a;
+		if (i_or_a == "a")
+		{
+			fill_interval_and_archiving_tables(file_config_archiving_interval, archiving);
+			file_config_archiving_interval >> i_or_a;
+			if (i_or_a != "i") 
+			{ 
+				throw "Error in proper letter in \"file_config_archiving_interval.txt\".\n"; 
 			}
-			else if (has_non_digit(interval[i].c_str()) == false && i != 0)
-			{
-				throw "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!\n";
+			fill_interval_and_archiving_tables(file_config_archiving_interval, interval);
+		}
+		else if (i_or_a == "i")
+		{
+			fill_interval_and_archiving_tables(file_config_archiving_interval, interval);
+			file_config_archiving_interval >> i_or_a;
+			if (i_or_a != "a") 
+			{ 
+				throw "Error in proper letter in \"file_config_archiving_interval.txt\".\n"; 
 			}
-			
+			fill_interval_and_archiving_tables(file_config_archiving_interval, archiving);
+		}
+		else
+		{
+			throw "Error in proper letter in \"file_config_archiving_interval.txt\".\n";
 		}
 
-		for (unsigned int i = 0; i < 5; i++)
-		{
-			file_config_archiving_interval >> archiving[i];
-
-			if (archiving[0] != "a")
-			{
-				throw "Error in order in the \"file_config_archiving_interval.txt\"\n";
-			}
-			else if (has_non_digit(archiving[i].c_str()) == false && i != 0)
-			{
-				throw "Error in order in the \"file_config_archiving_interval.txt\". Incorrect digit found!\n";
-			}
-		}
-
-		time_interval = atoi(interval[1].c_str()) + 60 * (atoi(interval[2].c_str())) + 3600 * atoi(interval[3].c_str()); //to seconds
-		time_archiving = atoi(archiving[1].c_str()) + 60 * (atoi(archiving[2].c_str())) + 3600 * atoi(archiving[3].c_str()) + 86400 * atoi(archiving[4].c_str());
+		time_interval = atoi(interval[0].c_str()) + 60 * (atoi(interval[1].c_str())) + 3600 * atoi(interval[2].c_str()) + 86400 * atoi(interval[3].c_str()); //to seconds
+		time_archiving = atoi(archiving[0].c_str()) + 60 * (atoi(archiving[1].c_str())) + 3600 * atoi(archiving[2].c_str()) + 86400 * atoi(archiving[3].c_str());
 
 		delete[] interval;
 		delete[] archiving;

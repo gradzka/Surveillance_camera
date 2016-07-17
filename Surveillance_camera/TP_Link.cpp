@@ -74,7 +74,7 @@ void TP_Link::fill_vector_of_presets(string login, string password, string addre
 	}
 	else
 	{
-		throw "Error! Can't download list of preset. Check if you have wget installed or \"WGET_DIR\" environment variable!\n set properly!\n";
+		throw "Error! Can't download list of preset. Check if you have wget installed or \"WGET_DIR\" environment variable set properly!\n";
 	}
 	
 }
