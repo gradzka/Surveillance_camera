@@ -21,7 +21,7 @@ Warning: You must have config files properly filled!
 - run "Surveillance_camera.exe"
 
 ###Linux
-- download the latest wget version: sudo apt-get install wget
+- install the latest wget version: sudo apt-get install wget
 - run "Surveillance_camera"
 
 ##How to compile
@@ -31,6 +31,7 @@ Warning: You must have config files properly filled!
 - other way is using the g++ compiler; in cmd type: g++ -std=c++11 -o Surveillance_camera.exe Source.cpp Camera.cpp Camera_model.cpp Preset.cpp DLink.cpp TP_Link.cpp
 
 ###Linux
+- make sure that you have g++ installed
 - using the terminal, go to the directory, where file CMakeLists.txt is
 - type cmake .
 - type make
