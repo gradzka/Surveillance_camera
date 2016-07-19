@@ -22,6 +22,7 @@ Warning: You must have config files properly filled!
 
 ###Linux
 - install the latest wget version: sudo apt-get install wget
+- check if you have proper permission to execute program; if not, then change it using "chmod" command in terminal
 - run "Surveillance_camera"
 
 ##How to compile
